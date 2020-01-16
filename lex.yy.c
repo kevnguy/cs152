@@ -455,7 +455,7 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "sample*.lex"
 #line 2 "sample*.lex"
-   int currLine = 1, currPos = 1;
+   int currLine = 1, currPos = 1, intCount = 0, opCount = 0, pCount = 0, eqCount = 0;
 #line 460 "lex.yy.c"
 
 #define INITIAL 0
@@ -638,7 +638,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 7 "sample*.lex"
+#line 5 "sample*.lex"
 
 
 #line 645 "lex.yy.c"
@@ -726,63 +726,63 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 9 "sample*.lex"
-{printf("MINUS\n"); currPos += yyleng;}
+#line 7 "sample*.lex"
+{printf("MINUS\n"); currPos += yyleng; ++opCount;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 10 "sample*.lex"
-{printf("PLUS\n"); currPos += yyleng;}
+#line 8 "sample*.lex"
+{printf("PLUS\n"); currPos += yyleng; ++opCount;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 11 "sample*.lex"
-{printf("MULT\n"); currPos += yyleng;}
+#line 9 "sample*.lex"
+{printf("MULT\n"); currPos += yyleng; ++opCount;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 12 "sample*.lex"
-{printf("DIV\n"); currPos += yyleng;}
+#line 10 "sample*.lex"
+{printf("DIV\n"); currPos += yyleng; ++opCount;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 13 "sample*.lex"
-{printf("EQUAL\n"); currPos += yyleng;}
+#line 11 "sample*.lex"
+{printf("EQUAL\n"); currPos += yyleng; ++eqCount;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 14 "sample*.lex"
-{printf("L_PAREN\n"); currPos += yyleng;}
+#line 12 "sample*.lex"
+{printf("L_PAREN\n"); currPos += yyleng; ++pCount;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 15 "sample*.lex"
-{printf("R_PAREN\n"); currPos += yyleng;}
+#line 13 "sample*.lex"
+{printf("R_PAREN\n"); currPos += yyleng; ++pCount;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 17 "sample*.lex"
-{printf("NUMBER %s\n", yytext); currPos += yyleng;}
+#line 15 "sample*.lex"
+{printf("NUMBER %s\n", yytext); currPos += yyleng; ++intCount;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 19 "sample*.lex"
+#line 17 "sample*.lex"
 {/* ignore spaces */ currPos += yyleng;}
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 21 "sample*.lex"
+#line 19 "sample*.lex"
 {currLine++; currPos = 1;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 23 "sample*.lex"
+#line 21 "sample*.lex"
 {printf("Error at line %d, column %d: unrecognized symbol \"%s\"\n", currLine, currPos, yytext); exit(0);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 25 "sample*.lex"
+#line 23 "sample*.lex"
 ECHO;
 	YY_BREAK
 #line 789 "lex.yy.c"
@@ -1779,12 +1779,18 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 25 "sample*.lex"
+#line 23 "sample*.lex"
 
 
 
 int main(int argc, char ** argv)
 {
+   yyin = fopen(argv[1], "r");
    yylex();
+   fclose(yyin);
+   printf("\nNumber of integers: %d\n", intCount);
+   printf("Number of parantheses: %d\n", pCount); 
+   printf("Number of equal signs: %d\n", eqCount);
+   printf("Number of operators: %d\n", opCount);
 }
 

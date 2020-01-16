@@ -1,20 +1,18 @@
 %{   
-   int currLine = 1, currPos = 1;
+   int currLine = 1, currPos = 1, intCount = 0, opCount = 0, pCount = 0, eqCount = 0;
 %}
-
-DIGIT    [0-9]
    
 %%
 
-"-"            {printf("MINUS\n"); currPos += yyleng;}
-"+"            {printf("PLUS\n"); currPos += yyleng;}
-"*"            {printf("MULT\n"); currPos += yyleng;}
-"/"            {printf("DIV\n"); currPos += yyleng;}
-"="            {printf("EQUAL\n"); currPos += yyleng;}
-"("            {printf("L_PAREN\n"); currPos += yyleng;}
-")"            {printf("R_PAREN\n"); currPos += yyleng;}
+"-"            {printf("MINUS\n"); currPos += yyleng; ++opCount;}
+"+"            {printf("PLUS\n"); currPos += yyleng; ++opCount;}
+"*"            {printf("MULT\n"); currPos += yyleng; ++opCount;}
+"/"            {printf("DIV\n"); currPos += yyleng; ++opCount;}
+"="            {printf("EQUAL\n"); currPos += yyleng; ++eqCount;}
+"("            {printf("L_PAREN\n"); currPos += yyleng; ++pCount;}
+")"            {printf("R_PAREN\n"); currPos += yyleng; ++pCount;}
 
-{DIGIT}+       {printf("NUMBER %s\n", yytext); currPos += yyleng;}
+[0-9]+       {printf("NUMBER %s\n", yytext); currPos += yyleng; ++intCount;}
 
 [ \t]+         {/* ignore spaces */ currPos += yyleng;}
 
@@ -26,5 +24,11 @@ DIGIT    [0-9]
 
 int main(int argc, char ** argv)
 {
+   yyin = fopen(argv[1], "r");
    yylex();
+   fclose(yyin);
+   printf("\nNumber of integers: %d\n", intCount);
+   printf("Number of parantheses: %d\n", pCount); 
+   printf("Number of equal signs: %d\n", eqCount);
+   printf("Number of operators: %d\n", opCount);
 }
