@@ -1,5 +1,8 @@
 %{   
+   
    int currLine = 1, currPos = 1;
+   unordered_set<string> reservedWords {"if", "else"};
+
 %}
 
 DIGIT    [0-9]
@@ -40,6 +43,10 @@ int main(int argc, char ** argv)
    }
    
    yylex();
+
+   for(int i = 0; i < 2; i++) {
+      cout << "hello" << endl;
+   }
    
    printf("# Numbers: %d\n", numNumbers);
    printf("# Operators: %d\n", numOperators);
