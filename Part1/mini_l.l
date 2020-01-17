@@ -1,11 +1,16 @@
-%{   
-   
-   int currLine = 1, currPos = 1;
-   unordered_set<string> reservedWords {"if", "else"};
-
+%{ 
+   #include <unordered_set>
+   #include <string>
+   using namespace std;  
+   int currLine = 1, currPos = 1, i = 0;
+   unordered_map<string, string> reservedWords = {
+      {"function", "FUNCTION"},
+      {"beginparams", "BEGIN_PARAMS"},
+   };
 %}
 
 DIGIT    [0-9]
+LETTER   [a-zA-Z]
    
 %%
 
@@ -18,6 +23,15 @@ DIGIT    [0-9]
 ")"            {printf("R_PAREN\n"); currPos += yyleng;}
 
 {DIGIT}+       {printf("NUMBER %s\n", yytext); currPos += yyleng;}
+
+{LETTER}({LETTER}|{DIGIT})* {
+   if(reservedWords.find(yytext) == reservedWords.end()) {
+      printf("IDENTIFIER: %s\n", yytext);
+   }
+   else {
+      printf("%s:\n", yytext);
+   }
+}
 
 [ \t]+         {/* ignore spaces */ currPos += yyleng;}
 
@@ -43,13 +57,4 @@ int main(int argc, char ** argv)
    }
    
    yylex();
-
-   for(int i = 0; i < 2; i++) {
-      cout << "hello" << endl;
-   }
-   
-   printf("# Numbers: %d\n", numNumbers);
-   printf("# Operators: %d\n", numOperators);
-   printf("# Parentheses: %d\n", numParens);
-   printf("# Equal Signs: %d\n", numEquals);
 }
