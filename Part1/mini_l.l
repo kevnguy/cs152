@@ -1,18 +1,47 @@
 %{ 
    #include <unordered_map>
    #include <string>
-   using namespace std;  
+   using namespace std;
    int currLine = 1, currPos = 1, i = 0;
    string temp;
    unordered_map<string, string> reservedWords = {
       {"function", "FUNCTION"},
       {"beginparams", "BEGIN_PARAMS"},
+      {"endparams", "END_PARAMS"},
+      {"beginlocals", "BEGIN_LOCALS"},
+      {"endlocals", "END_LOCALS"},
+      {"beginbody", "BEGIN_BODY"},
+      {"endbody", "END_BODY"},
+      {"integer", "INTEGER"},
+      {"array", "ARRAY"},
+      {"of", "OF"},
+      {"if", "IF"},
+      {"then", "THEN"},
+      {"endif", "ENDIF"},
+      {"else", "ELSE"},
+      {"while", "WHILE"},
+      {"do", "DO"},
+      {"for", "FOR"},
+      {"beginloop", "BEGINLOOP"},
+      {"endloop", "ENDLOOP"},
+      {"continue", "CONTINUE"},
+      {"read", "READ"},
+      {"write", "WRITE"},
+      {"and", "AND"},
+      {"or", "OR"},
+      {"not", "NOT"},
+      {"true", "TRUE"},
+      {"false", "FALSE"},
+      {"return", "RETURN"}
+   };
+   unordered_map<string, string> arithmeticOp = {
+
    };
 %}
 
 DIGIT    [0-9]
 LETTER   [a-zA-Z]
-   
+
 %%
 
 "-"            {printf("MINUS\n"); currPos += yyleng;}
@@ -58,6 +87,6 @@ int main(int argc, char ** argv)
    {
       yyin = stdin;
    }
-   
+
    yylex();
 }
