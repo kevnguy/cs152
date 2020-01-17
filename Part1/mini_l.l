@@ -1,8 +1,9 @@
 %{ 
-   #include <unordered_set>
+   #include <unordered_map>
    #include <string>
    using namespace std;  
    int currLine = 1, currPos = 1, i = 0;
+   string temp;
    unordered_map<string, string> reservedWords = {
       {"function", "FUNCTION"},
       {"beginparams", "BEGIN_PARAMS"},
@@ -26,11 +27,13 @@ LETTER   [a-zA-Z]
 
 {LETTER}({LETTER}|{DIGIT})* {
    if(reservedWords.find(yytext) == reservedWords.end()) {
-      printf("IDENTIFIER: %s\n", yytext);
+      printf("IDENT %s\n", yytext);
    }
    else {
-      printf("%s:\n", yytext);
+      temp = reservedWords[yytext];
+      printf("%s:\n", temp.c_str());
    }
+   currPos += yyleng;
 }
 
 [ \t]+         {/* ignore spaces */ currPos += yyleng;}
