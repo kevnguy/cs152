@@ -57,8 +57,8 @@ COMMENT [#]
 
 "=="           {printf("EQ\n"); currPos += yyleng;}
 "<>"           {printf("NEQ\n"); currPos += yyleng;}
-"<"            {printf("LT\n"); currPos += yyleng;}
-">"            {printf("GT\n"); currPos += yyleng;}
+"<"           {printf("LT\n"); currPos += yyleng;}
+">"           {printf("GT\n"); currPos += yyleng;}
 "<="           {printf("LTE\n"); currPos += yyleng;}
 ">="           {printf("GTE\n"); currPos += yyleng;}
 

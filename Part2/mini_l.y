@@ -10,3 +10,8 @@
 %start input
 
 %%
+
+prog_start:                 functions {cout << "prog_start -> functions"}
+functions:                  function functions
+                            | /*empty*/
+function:                   FUNCTION IDENT SEMICOLON BEGIN
