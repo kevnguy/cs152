@@ -1,4 +1,5 @@
-prog_start -> functions
+prog_start -> epsilon
+            | functions
 functions -> function functions
             | epsilon
 function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY

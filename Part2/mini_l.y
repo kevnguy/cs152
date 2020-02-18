@@ -7,57 +7,28 @@
     int yyerror(string s);
     int yyerror(char *s);
     int yylex(void);
-}
+%}
+
+%start prog_start
 
 %token FUNCTION
-%token IDENT
-%token SEMICOLON
-%token BEGIN_PARAMS
-%token END_PARAMS
-%token BEGIN_LOCALS
-%token END_LOCALS
-%token BEGIN_BODY
-%token COLON
-%token INTEGER
-%token ARRAY
-%token L_SQUARE_BRACKET
-%token R_SQUARE_BRACKET
-%token NUMBER
-%token OF
-%token ASSIGN
-%token IF
-%token THEN
-%token ENDIF
-%token ELSE
-%token BEGINLOOP
-%token ENDLOOP
-%token WHILE
-%token READ
-%token WRITE
-&token CONTINUE
-%token RETURN
-%token OR
-%token AND
-%token L_PAREN
-%token R_PAREN
-%token TRUE
-%token FALSE
-%token LT
-%token GT
-%token NEQ
-%token LTE
-%token GTE
-%left ADD
-%left SUB
-%left DIV
-%left MULT
-%left MOD
-%token NEG
-%token COMMA
+%token SEMICOLON COLON COMMA IDENT
+%token BEGIN_PARAMS END_PARAMS BEGIN_LOCALS END_LOCALS BEGIN_BODY
+%token INTEGER NUMBER ARRAY
+%token L_SQUARE_BRACKET R_SQUARE_BRACKET
+%token IF THEN ENDIF ELSE WHILE OF
+%token BEGINLOOP ENDLOOP
+%token READ WRITE CONTINUE RETURN
+%token OR AND
+%token GT LT NEQ LTE GTE
+%token L_PAREN R_PAREN
+%token TRUE FALSE
+%left ADD SUB DIV MULT MOD NEG ASSIGN
 
 %%
 
-prog_start:         functions {cout << "prog_start -> functions" << endl;}
+prog_start:         /*epsilon*/ {cout << "prog_start -> epsilon"}
+                    | functions {cout << "prog_start -> functions" << endl;}
 functions:          function functions {cout << "functions -> function functions" << endl;}
                     | /*epsilon*/ {cout << "functions -> epsilon" << endl;}
 function:           FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY {cout << "function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY << endl;"}
