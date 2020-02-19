@@ -2,7 +2,7 @@ prog_start -> epsilon
             | functions
 functions -> function functions
             | epsilon
-function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY
+function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY declarations END_BODY
 declaration -> identifiers COLON INTEGER
             | identifiers COLON ARRAY L_SQUARE_BRACKET NUMBER R_SQUARE_BRACKET OF INTEGER
 declarations -> declaration SEMICOLON declarations

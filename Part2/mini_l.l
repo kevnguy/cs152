@@ -48,7 +48,7 @@ COMMENT [#]
 "beginparams"  {currPos += yyleng; return BEGIN_PARAMS;}
 "endparams"    {currPos += yyleng; return END_PARAMS;}
 "beginlocals"  {currPos += yyleng; return BEGIN_LOCALS;}
-"endloacls"    {currPos += yyleng; return END_LOCALS;}
+"endlocals"    {currPos += yyleng; return END_LOCALS;}
 "beginbody"    {currPos += yyleng; return BEGIN_BODY;}
 "endbody"      {currPos += yyleng; return END_BODY;}
 "integer"      {currPos += yyleng; return INTEGER;}
@@ -98,15 +98,10 @@ COMMENT [#]
 
 {DIGIT}+       {yylval.num = stoi(yytext); currPos += yyleng; return NUMBER;}
 
-{LETTER}({LETTER}|{DIGIT})* {
-   currPos += yyleng;
-   if(reservedWords.find(yytext) == reservedWords.end()) {
-      yylval.id = yytext;
-      return IDENT;
-   }
-   else {
-      return reservedWords[yytext];
-   }
+{LETTER}({LETTER}|{DIGIT}|{UNDERSCORE})*({LETTER}|{DIGIT})* {
+    currPos += yyleng;
+    yylval.id = yytext;
+    return IDENT;
 }
 
 [ \t]+         {/* ignore spaces */ currPos += yyleng;}
@@ -114,6 +109,7 @@ COMMENT [#]
 {COMMENT}{COMMENT}({LETTER}|{DIGIT}|{UNDERSCORE}|{COMMENT}|[\t]|[ ])* {currPos = 1; currLine++;}
 
 "\n"           {currLine++; currPos = 1;}
+"\r"
 
 {UNDERSCORE}({LETTER}|{DIGIT})* {
    {printf("Error at line %d, column %d: identifier \"%s\" must begin with a letter\n", currLine, currPos, yytext); exit(0);}

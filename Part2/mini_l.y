@@ -28,7 +28,7 @@
 %token FOR DO EQ
 %token END_BODY NOT
 %left ADD SUB DIV MULT MOD NEG ASSIGN
-    
+
 %union {
     int num;
     char* id;
@@ -39,7 +39,7 @@
 prog_start:         functions {cout << "prog_start -> functions" << endl;};
 functions:          function functions {cout << "functions -> function functions" << endl;}
                     | /*epsilon*/ {cout << "functions -> epsilon" << endl;};
-function:           FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{cout << "function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY << endl;"};
+function:           FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{cout << "function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY" << endl;};
 declaration:        identifiers COLON INTEGER {cout << "declaration -> identifiers COLON INTEGER" << endl;}
                     | identifiers COLON ARRAY L_SQUARE_BRACKET NUMBER R_SQUARE_BRACKET OF INTEGER {cout << "declaration -> identifiers COLON ARRAY L_SQUARE_BRACKET NUMBER R_SQUARE_BRACKET OF INTEGER" << endl;};
 declarations:       declaration SEMICOLON declarations {cout << "declarations -> declaration SEMICOLON declarations" << endl;}
@@ -108,7 +108,7 @@ int yyerror (char* s) {
     return yyerror(string(s));
 }
 
-int main(int argc, char ** argv)
+/*int main(int argc, char ** argv)
 {
    if(argc >= 2)
    {
@@ -124,4 +124,4 @@ int main(int argc, char ** argv)
    }
 
    yyparse();
-}
+}*/
