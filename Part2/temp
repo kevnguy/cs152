@@ -44,3 +44,4 @@ term_num -> var | NUMBER | L_PAREN expression R_PAREN
 vars -> var | var COMMA vars
 var -> ident L_SQUARE_BRACKET expression R_SQUARE_BRACKET
             | ident
+identifiers -> IDENT COMMA identifiers | IDENT

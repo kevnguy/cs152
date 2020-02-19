@@ -1,45 +1,40 @@
 %{
    #include <unordered_map>
    #include <string>
+   #include "mini_l.tab.h"
+
    using namespace std;
    int currLine = 1, currPos = 1, i = 0;
    string temp;
-   unordered_map<string, string> reservedWords = {
-      {"function", "FUNCTION"},
-      {"beginparams", "BEGIN_PARAMS"},
-      {"endparams", "END_PARAMS"},
-      {"beginlocals", "BEGIN_LOCALS"},
-      {"endlocals", "END_LOCALS"},
-      {"beginbody", "BEGIN_BODY"},
-      {"endbody", "END_BODY"},
-      {"integer", "INTEGER"},
-      {"array", "ARRAY"},
-      {"of", "OF"},
-      {"if", "IF"},
-      {"then", "THEN"},
-      {"endif", "ENDIF"},
-      {"else", "ELSE"},
-      {"while", "WHILE"},
-      {"do", "DO"},
-      {"for", "FOR"},
-      {"beginloop", "BEGINLOOP"},
-      {"endloop", "ENDLOOP"},
-      {"continue", "CONTINUE"},
-      {"read", "READ"},
-      {"write", "WRITE"},
-      {"and", "AND"},
-      {"or", "OR"},
-      {"not", "NOT"},
-      {"true", "TRUE"},
-      {"false", "FALSE"},
-      {"return", "RETURN"}
-   };
-   unordered_map<string, string> arithmeticOp = {
-      {"-", "MINUS"},
-      {"+", "PLUS"},
-      {"*", "MULT"},
-      {"/", "DIV"},
-      {"=", "EQUAL"}
+   unordered_map<string, yytokentype> reservedWords = {
+      {"function", FUNCTION},
+      {"beginparams", BEGIN_PARAMS},
+      {"endparams", END_PARAMS},
+      {"beginlocals", BEGIN_LOCALS},
+      {"endlocals", END_LOCALS},
+      {"beginbody", BEGIN_BODY},
+      {"endbody", END_BODY},
+      {"integer", INTEGER},
+      {"array", ARRAY},
+      {"of", OF},
+      {"if", IF},
+      {"then", THEN},
+      {"endif", ENDIF},
+      {"else", ELSE},
+      {"while", WHILE},
+      {"do", DO},
+      {"for", FOR},
+      {"beginloop", BEGINLOOP},
+      {"endloop", ENDLOOP},
+      {"continue", CONTINUE},
+      {"read", READ},
+      {"write", WRITE},
+      {"and", AND},
+      {"or", OR},
+      {"not", NOT},
+      {"true", TRUE},
+      {"false", FALSE},
+      {"return", RETURN}
    };
 %}
 
@@ -49,40 +44,40 @@ UNDERSCORE [_]
 COMMENT [#]
 
 %%
-"-"            {printf("SUB\n"); currPos += yyleng;}
-"+"            {printf("ADD\n"); currPos += yyleng;}
-"*"            {printf("MULT\n"); currPos += yyleng;}
-"/"            {printf("DIV\n"); currPos += yyleng;}
-"%"            {printf("MOD\n"); currPos += yyleng;}
+"-"            {currPos += yyleng; return SUB;}
+"+"            {currPos += yyleng; return ADD;}
+"*"            {currPos += yyleng; return MULT;}
+"/"            {currPos += yyleng; return DIV;}
+"%"            {currPos += yyleng; return MOD;}
 
-"=="           {printf("EQ\n"); currPos += yyleng;}
-"<>"           {printf("NEQ\n"); currPos += yyleng;}
-"<"           {printf("LT\n"); currPos += yyleng;}
-">"           {printf("GT\n"); currPos += yyleng;}
-"<="           {printf("LTE\n"); currPos += yyleng;}
-">="           {printf("GTE\n"); currPos += yyleng;}
+"=="           {currPos += yyleng; return EQ;}
+"<>"           {currPos += yyleng; return NEQ;}
+"<"            {currPos += yyleng; return LT;}
+">"            {currPos += yyleng; return GT;}
+"<="           {currPos += yyleng; return LTE;}
+">="           {currPos += yyleng; return GTE;}
 
-";"            {printf("SEMICOLON\n"); currPos += yyleng;}
-":"            {printf("COLON\n"); currPos += yyleng;}
-","            {printf("COMMA\n"); currPos += yyleng;}
-"("            {printf("L_PAREN\n"); currPos += yyleng;}
-")"            {printf("R_PAREN\n"); currPos += yyleng;}
-"["            {printf("L_SQUARE_BRACKET\n"); currPos += yyleng;}
-"]"            {printf("R_SQUARE_BRACKET\n"); currPos += yyleng;}
-":="           {printf("ASSIGN\n"); currPos += yyleng;}
+";"            {currPos += yyleng; return SEMICOLON;}
+":"            {currPos += yyleng; return COLON;}
+","            {currPos += yyleng; return COMMA;}
+"("            {currPos += yyleng; return L_PAREN;}
+")"            {currPos += yyleng; return R_PAREN;}
+"["            {currPos += yyleng; return L_SQUARE_BRACKET;}
+"]"            {currPos += yyleng; return R_SQUARE_BRACKET;}
+":="           {currPos += yyleng; return ASSIGN;}
 
 
-{DIGIT}+       {printf("NUMBER %s\n", yytext); currPos += yyleng;}
+{DIGIT}+       {yylval.num = stoi(yytext); currPos += yyleng; return NUMBER;}
 
 {LETTER}({LETTER}|{DIGIT})* {
+   currPos += yyleng;
    if(reservedWords.find(yytext) == reservedWords.end()) {
-      printf("IDENT %s\n", yytext);
+      yylval.id = yytext;
+      return IDENT;
    }
    else {
-      temp = reservedWords[yytext];
-      printf("%s\n", temp.c_str());
+      return reservedWords[yytext];
    }
-   currPos += yyleng;
 }
 
 [ \t]+         {/* ignore spaces */ currPos += yyleng;}
@@ -122,5 +117,5 @@ int main(int argc, char ** argv)
       yyin = stdin;
    }
 
-   yylex();
+   yyparse();
 }
