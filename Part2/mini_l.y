@@ -7,6 +7,7 @@
     int yyerror(string s);
     int yyerror(char *s);
     int yylex(void);
+    extern FILE* yyin;
 %}
 
 
@@ -25,20 +26,20 @@
 %token L_PAREN R_PAREN
 %token TRUE FALSE
 %token FOR DO EQ
+%token END_BODY NOT
 %left ADD SUB DIV MULT MOD NEG ASSIGN
     
 %union {
     int num;
-    string id;
+    char* id;
 }
 
 %%
 
-prog_start:         functions {cout << "prog_start -> functions" << endl;}
-                    | /*epsilon*/ {cout << "prog_start -> epsilon" << endl;};
+prog_start:         functions {cout << "prog_start -> functions" << endl;};
 functions:          function functions {cout << "functions -> function functions" << endl;}
                     | /*epsilon*/ {cout << "functions -> epsilon" << endl;};
-function:           FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY {cout << "function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY << endl;"};
+function:           FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{cout << "function -> FUNCTION IDENT SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY << endl;"};
 declaration:        identifiers COLON INTEGER {cout << "declaration -> identifiers COLON INTEGER" << endl;}
                     | identifiers COLON ARRAY L_SQUARE_BRACKET NUMBER R_SQUARE_BRACKET OF INTEGER {cout << "declaration -> identifiers COLON ARRAY L_SQUARE_BRACKET NUMBER R_SQUARE_BRACKET OF INTEGER" << endl;};
 declarations:       declaration SEMICOLON declarations {cout << "declarations -> declaration SEMICOLON declarations" << endl;}
@@ -105,4 +106,22 @@ int yyerror (string s) {
 
 int yyerror (char* s) {
     return yyerror(string(s));
+}
+
+int main(int argc, char ** argv)
+{
+   if(argc >= 2)
+   {
+      yyin = fopen(argv[1], "r");
+      if(yyin == NULL)
+      {
+         yyin = stdin;
+      }
+   }
+   else
+   {
+      yyin = stdin;
+   }
+
+   yyparse();
 }
