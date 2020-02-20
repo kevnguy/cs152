@@ -22,7 +22,8 @@ To invoke lexical analyzer executable `lexer`, use
 ## Part 2
 ### Instructions for use (Linux)
 * `make` creates a `parser` executable in the current directory
-* If input is read from file, execute with `cat | name_if_input_file.txt | parser`
+* after calling `make`, you can execute a test on `fibonacci.min` by using `make test`
+* If input is read from a custom file, execute with `cat name_if_input_file.txt | parser`
 
 ### Instructions for use (Mac)
 * `flex filename.lex` - creates a `lex.yy.c` file in the current directory
