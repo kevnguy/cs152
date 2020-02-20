@@ -98,9 +98,8 @@ expressions:        expression COMMA expressions {cout << "expressions -> expres
 int yyerror (string s) {
     extern int currLine, currPos;
     extern char *yytext;
-    cout << "ERROR: syntax parsing error at line" << currLine << ", column" << currPos
-            << endl << "Unexpected symbol" << yytext << "encountered." << endl;
-    cout << s << endl;
+    cout << s << ": parsing error at line: " << currLine << ", column: " << currPos << endl
+            << "Unexpected symbol `" << yytext << "` encountered." << endl;
     exit(1);
 }
 
