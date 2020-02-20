@@ -19,7 +19,7 @@ A lexical analyzer for MINI-L built with flex. For the Compilers course at UC Ri
 To invoke lexical analyzer executable `lexer`, use
 * `cat filename.min | lexer`
 
-## Part2
+## Part 2
 ### Instructions for use (Linux)
 * `make` creates a `parser` executable in the current directory
 * If input is read from file, execute with `cat | name_if_input_file.txt | parser`
