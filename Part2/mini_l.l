@@ -98,7 +98,13 @@ COMMENT [#]
 
 {DIGIT}+       {yylval.num = stoi(yytext); currPos += yyleng; return NUMBER;}
 
-{LETTER}({LETTER}|{DIGIT}|{UNDERSCORE})*({LETTER}|{DIGIT})* {
+{LETTER} {
+    currPos += yyleng;
+    yylval.id = yytext;
+    return IDENT;
+}
+
+{LETTER}({LETTER}|{DIGIT}|{UNDERSCORE})*({LETTER}|{DIGIT}) {
     currPos += yyleng;
     yylval.id = yytext;
     return IDENT;
