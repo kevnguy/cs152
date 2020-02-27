@@ -1,6 +1,7 @@
 # CS152 - Compilers at UCR Winter 2020
 
-A lexical analyzer for MINI-L built with flex. For the Compilers course at UC Riverside.
+A lexical analyzer for MINI-L built with flex. For the Compilers course at UC Riverside. <br /> <br />
+**Important Note**: OSX comes pre-installed with an outdated version of bison that does not support C++. Please update bison on your system to the latest version to avoid errors. 
 
 ## Part 1
 ### Instructions for use (Linux)
