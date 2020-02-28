@@ -7,6 +7,10 @@
     int yyerror(char *s);
     int yylex(void);
     extern FILE* yyin;
+    struct nonTerm {
+        string code;
+        string ret_name;
+    }
 %}
 
 
@@ -30,9 +34,11 @@
 %token END_BODY NOT
 %left ADD SUB DIV MULT MOD NEG ASSIGN
 
+%type<nterm> de
 %union {
     int num;
     char* id;
+    nonTerm* nterm;
 }
 
 %%
@@ -67,15 +73,41 @@ relation_exp:       nots expression comp expression {}
                     | L_PAREN bool_exp R_PAREN {};
 nots:               NOT {};
                     | /*epsilon*/ {};
-comp:               EQ {}
+comp:               EQ {
+                        stringstream ss;
+                        ss << "=";
+                        $$.code = ss.str();
+                        $$.ret_name = ????
+                    }
                     | NEQ {}
                     | LT {}
                     | GT {}
                     | LTE {}
                     | GTE {};
-expression:         multiplicative_expression {}
-                    | multiplicative_expression ADD multiplicative_expression {}
-                    | multiplicative_expression SUB multiplicative_expression {};
+expression:         multiplicative_expression {
+                        stringstream ss;
+                        ss << $1.code;
+                        $$.code = ss.str();
+                        $$.ret_name = ?????
+                    }
+                    | multiplicative_expression ADD multiplicative_expression {
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << $1.code << $3.code;
+                        ss << "." << temp_var; //declare destination
+                        ss << "+" << temp_var << "," << $1.ret_name << "," << $3.ret_name;
+                        $$.code = ss.str();
+                        $$.ret_name = temp_var;
+                    }
+                    | multiplicative_expression SUB multiplicative_expression {
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << $1.code << $3.code;
+                        ss << "." << temp_var;
+                        ss << "-" << temp_var << "," << "$1.ret_name" << "," << $3.ret_name;
+                        $$.code = ss.str();
+                        $$.ret_name = temp_var;
+                    };
 multiplicative_expression: term {}
                     | term MULT term {}
                     | term DIV term {}
