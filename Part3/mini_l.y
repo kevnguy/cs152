@@ -11,6 +11,9 @@
         string code;
         string ret_name;
     }
+    //function for label (just return string "label n")
+    //same for tempvar^
+    //may need struct for operators
 %}
 
 
@@ -34,7 +37,9 @@
 %token END_BODY NOT
 %left ADD SUB DIV MULT MOD NEG ASSIGN
 
-%type<nterm> de
+//attach nonTerm type to all nonterminals like below
+%type<nterm> prog_start
+
 %union {
     int num;
     char* id;
@@ -42,7 +47,7 @@
 }
 
 %%
-
+//Actual output done in prog_start
 prog_start:         functions {};
 functions:          function functions {}
                     | /*epsilon*/ {};
