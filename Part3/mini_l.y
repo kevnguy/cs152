@@ -73,34 +73,57 @@ bool_exp:           relation_and_exp OR relation_and_exp {}
 relation_and_exp:   relation_exp AND relation_exp {}
                     | relation_exp {};
 relation_exp:       nots expression comp expression {}
-                    | TRUE {}
-                    | FALSE {}
-                    | L_PAREN bool_exp R_PAREN {};
-nots:               NOT {};
-                    | /*epsilon*/ {};
-comp:               EQ {
-                        stringstream ss;
-                        ss << "=";
-                        $$.code = ss.str();
-                        $$.ret_name = ????
+                    | TRUE {
+                        $$.code = //empty?
+                        $$.ret_name = "1";
                     }
-                    | NEQ {}
-                    | LT {}
-                    | GT {}
-                    | LTE {}
-                    | GTE {};
+                    | FALSE {
+                        $$.code = //empty?
+                        $$.ret_name = "0";
+                    }
+                    | L_PAREN bool_exp R_PAREN {
+                        $$.code = $2.code;
+                        $$.ret_name = $2.ret_name;
+                    };
+nots:               NOT {
+                        $$.code = //empty?
+                        $$.ret_name = "! ";
+                    };
+                    | /*epsilon*/ {}; //do anything with epsilon?
+comp:               EQ {
+                        $$.code = //empty?
+                        $$.ret_name = "== ";
+                    }
+                    | NEQ {
+                        $$.code = //empty?
+                        $$.ret_name = "!= ";
+                    }
+                    | LT {
+                        $$.code = //empty?
+                        $$.ret_name = "< ";
+                    }
+                    | GT {
+                        $$.code = //empty?
+                        $$.ret_name = "> ";
+                    }
+                    | LTE {
+                        $$.code = //empty?
+                        $$.ret_name = "<= ";
+                    }
+                    | GTE {
+                        $$.code = //empty?
+                        $$.ret_name = ">= ";
+                    };
 expression:         multiplicative_expression {
-                        stringstream ss;
-                        ss << $1.code;
-                        $$.code = ss.str();
-                        $$.ret_name = ?????
+                        $$.code = $1.code;
+                        $$.ret_name = $1.ret_name;
                     }
                     | multiplicative_expression ADD multiplicative_expression {
                         string temp_var = make_temp();
                         stringstream ss;
                         ss << $1.code << $3.code;
-                        ss << "." << temp_var; //declare destination
-                        ss << "+" << temp_var << "," << $1.ret_name << "," << $3.ret_name;
+                        ss << ". " << temp_var << "\n"; //declare destination
+                        ss << "+ " << temp_var << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
                         $$.code = ss.str();
                         $$.ret_name = temp_var;
                     }
@@ -108,33 +131,110 @@ expression:         multiplicative_expression {
                         string temp_var = make_temp();
                         stringstream ss;
                         ss << $1.code << $3.code;
-                        ss << "." << temp_var;
-                        ss << "-" << temp_var << "," << "$1.ret_name" << "," << $3.ret_name;
+                        ss << ". " << temp_var << "\n";
+                        ss << "- " << temp_var << ", " << "$1.ret_name" << ", " << $3.ret_name << "\n";
                         $$.code = ss.str();
                         $$.ret_name = temp_var;
                     };
-multiplicative_expression: term {}
-                    | term MULT term {}
-                    | term DIV term {}
-                    | term MOD term {};
+multiplicative_expression: term {
+                        $$.code = $1.code;
+                        $$.ret_name = $1.ret_name;
+                    }
+                    | term MULT term {
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << $1.code << $3.code;
+                        ss << ". " << tempvar << "\n";
+                        ss << "* " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
+                        $$.code = ss.str();
+                        $$.ret_name = temp_var;
+                    }
+                    | term DIV term {
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << $1.code << $3.code;
+                        ss << ". " << tempvar << "\n";
+                        ss << "/ " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
+                        $$.code = ss.str();
+                        $$.ret_name = temp_var;
+                    }
+                    | term MOD term {
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << $1.code << $3.code;
+                        ss << ". " << tempvar << "\n";
+                        ss << "% " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
+                        $$.code = ss.str();
+                        $$.ret_name = temp_var;
+                    };
 term:               NEG term_num {}
                     | term_num {}
-                    | identifier L_PAREN expressions R_PAREN {};
+                    | identifier L_PAREN expressions R_PAREN { //possible check for undeclared
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << $3.code;
+                        ss << ". " << tempvar << "\n";
+                        ss <<
+
+                    };
 term_num:           var {}
                     | number {}
-                    | L_PAREN expression R_PAREN {}
-                    | var COMMA vars {;
-var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {cout << "var -> identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET" << endl;}
-                    | identifier {};
+                    | L_PAREN expression R_PAREN {
+                        $$.code = $2.code;
+                        $$.ret_name = $2.ret_name;
+                    }
+                    | var COMMA vars {};
+vars:               var {}
+                    | var COMMA vars {};
+var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {}
+                    | identifier {
+                        $$.code = //empty?
+                        $$.ret_name = $1.ret_name;
+                    };
 identifiers:        identifier COMMA identifiers {}
-                    | identifier {};
-identifier:         IDENT {};
-number:             NUMBER {};
-expressions:        expression COMMA expressions {}
-                    | expression {}
-                    | {};
+                    | identifier {
+                        $$.code = //empty?
+                        $$.ret_name = $1.ret_name;
+                    };
+identifier:         IDENT {
+                        $$.code = //empty?
+                        $$.ret_name = $1.ret_name;
+                    };
+number:             NUMBER {
+                        $$.code = //empty?
+                        $$.ret_name = to_string($1);
+                    };
+expressions:        expression COMMA expressions {
+                        stringstream ss;
+                        ss << $1.code << "param " << $1.ret_name << "\n";
+                        ss << "$3.code";
+                        $$.code = ss.str();
+                        $$ret_name = //empty?
+                    }
+                    | expression {
+                        stringstream ss;
+                        ss << $1.code << "param " << $1.ret_name << "\n";
+                        $$.code = ss.str();
+                        $$.ret_name = //empty?
+                    }
+                    | {
+                        $$.code = //empty?
+                        $$.ret_name = //empty?
+                    };
 
 %%
+
+string make_temp() {
+    static int num = 0;
+    string temp = "__temp" + to_string(num++) + "__";
+    return temp;
+}
+
+string make_label() {
+    static int num = 0;
+    string label = "__label" + to_string(num++) + "__";
+    return label;
+}
 
 int yyerror (string s) {
     extern int currLine, currPos;
