@@ -72,7 +72,15 @@ bool_exp:           relation_and_exp OR relation_and_exp {}
                     | relation_and_exp {};
 relation_and_exp:   relation_exp AND relation_exp {}
                     | relation_exp {};
-relation_exp:       nots expression comp expression {}
+relation_exp:       nots expression comp expression {
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << $1.code << $2.code << $4.code << "\n"; //how to do negatives?
+                        ss << "." << temp_var << "\n";
+                        ss << $3 << temp_var << $2.ret_name << ", " << $4.ret_name << "\n";
+                        $$.code = ss.str();
+                        $$.ret_name = temp_var;
+                    }
                     | TRUE {
                         $$.code = //empty?
                         $$.ret_name = "1";
@@ -85,7 +93,10 @@ relation_exp:       nots expression comp expression {}
                         $$.code = $2.code;
                         $$.ret_name = $2.ret_name;
                     };
-nots:               NOT {
+nots:               NOT {//////////////////////////////////////
+                        string temp_var = make_temp();
+                        stringstream ss;
+                        ss << "! " << temp_var << ", " <<
                         $$.code = //empty?
                         $$.ret_name = "! ";
                     };
@@ -217,7 +228,7 @@ expressions:        expression COMMA expressions {
                         $$.code = ss.str();
                         $$.ret_name = //empty?
                     }
-                    | {
+                    | /*epsilon*/ {
                         $$.code = //empty?
                         $$.ret_name = //empty?
                     };
