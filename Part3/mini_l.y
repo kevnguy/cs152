@@ -1,4 +1,13 @@
 /* MINI-L Parser for CS152 Part 2*/
+%code requires{
+    #include <string>
+    using namespace std;
+    struct nonTerm {
+        string code;
+        string ret_name;
+    }
+}
+
 %{
     #include <iostream>
     #include <string>
@@ -39,6 +48,27 @@
 
 //attach nonTerm type to all nonterminals like below
 %type<nterm> prog_start
+%type<nterm> functions
+%type<nterm> function
+%type<nterm> declaration
+%type<nterm> declarations
+%type<nterm> statement
+%type<nterm> statements
+%type<nterm> bool_exp
+%type<nterm> relation_and_exp
+%type<nterm> relation_exp
+%type<nterm> nots
+%type<nterm> comp
+%type<nterm> expression
+%type<nterm> multiplicative_expression
+%type<nterm> term
+%type<nterm> term_num
+%type<nterm> vars
+%type<nterm> var
+%type<nterm> identifiers
+%type<nterm> identifier
+%type<nterm> number
+%type<nterm> expressions
 
 %union {
     int num;
@@ -51,9 +81,29 @@
 prog_start:         functions {};
 functions:          function functions {}
                     | /*epsilon*/ {};
-function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{};
-declaration:        identifiers COLON INTEGER {}
-                    | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER {};
+function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
+                        stringstream ss;
+                        ss << "func" << $2.
+                    };
+declaration:        identifiers COLON INTEGER { //done
+                        stringstream ss;
+                        string hold;
+                        string temp = $1.code;
+                        stringstream ids(temp);
+                        while(ids >> hold) {
+                            ss << ". " << hold << "\n";
+                            ss << "= " << hold << ", " << $3 << "\n";
+                        }
+                    }
+                    | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER { //done
+                        stringstream ss;
+                        string hold;
+                        string temp = $1.code;
+                        stringstream ids(temp);
+                        while(ids >> hold) {
+                            ss << ".[] " << hold << ", " << $4.code << "\n";
+                        }
+                    };
 declarations:       declaration SEMICOLON declarations {}
                     | /*epsilon*/ {};
 statement:          var ASSIGN expression {}
@@ -73,56 +123,51 @@ bool_exp:           relation_and_exp OR relation_and_exp {}
 relation_and_exp:   relation_exp AND relation_exp {}
                     | relation_exp {};
 relation_exp:       nots expression comp expression {
-                        string temp_var = make_temp();
+                        string temp_var1 = make_temp();
+                        string temp_var2 = make_temp();
                         stringstream ss;
-                        ss << $1.code << $2.code << $4.code << "\n"; //how to do negatives?
-                        ss << "." << temp_var << "\n";
-                        ss << $3 << temp_var << $2.ret_name << ", " << $4.ret_name << "\n";
+                        ss << ". " << temp_var1 << "\n";
+                        ss << $3.ret_name << temp_var1 << ", " << $2.code << ", " << $4.code << "\n";
+                        ss << ". " << temp_var2 << "\n";
+                        ss << "! " << temp_var2 << ", " << temp_var1 << "\n";
                         $$.code = ss.str();
-                        $$.ret_name = temp_var;
                     }
-                    | TRUE {
+                    | nots TRUE {
                         $$.code = //empty?
                         $$.ret_name = "1";
                     }
-                    | FALSE {
+                    | nots FALSE {
                         $$.code = //empty?
                         $$.ret_name = "0";
                     }
-                    | L_PAREN bool_exp R_PAREN {
+                    | nots L_PAREN bool_exp R_PAREN {
                         $$.code = $2.code;
                         $$.ret_name = $2.ret_name;
                     };
-nots:               NOT {//////////////////////////////////////
+nots:               NOT {
                         string temp_var = make_temp();
                         stringstream ss;
-                        ss << "! " << temp_var << ", " <<
-                        $$.code = //empty?
+                        ss << "! " << temp_var << ", ";
+                        $$.code = ss;
                         $$.ret_name = "! ";
                     };
-                    | /*epsilon*/ {}; //do anything with epsilon?
+                    | /*epsilon*/ {};
 comp:               EQ {
-                        $$.code = //empty?
                         $$.ret_name = "== ";
                     }
                     | NEQ {
-                        $$.code = //empty?
                         $$.ret_name = "!= ";
                     }
                     | LT {
-                        $$.code = //empty?
                         $$.ret_name = "< ";
                     }
                     | GT {
-                        $$.code = //empty?
                         $$.ret_name = "> ";
                     }
                     | LTE {
-                        $$.code = //empty?
                         $$.ret_name = "<= ";
                     }
                     | GTE {
-                        $$.code = //empty?
                         $$.ret_name = ">= ";
                     };
 expression:         multiplicative_expression {
@@ -202,18 +247,19 @@ var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {}
                         $$.code = //empty?
                         $$.ret_name = $1.ret_name;
                     };
-identifiers:        identifier COMMA identifiers {}
-                    | identifier {
-                        $$.code = //empty?
+identifiers:        identifier COMMA identifiers { //done
+                        stringstream ss;
+                        ss << $1.ret_name << " " << $3.code;
+                        $$.code = ss;
+                    }
+                    | identifier { //done
                         $$.ret_name = $1.ret_name;
                     };
-identifier:         IDENT {
-                        $$.code = //empty?
-                        $$.ret_name = $1.ret_name;
+identifier:         IDENT { //done
+                        $$.ret_name = $1;
                     };
 number:             NUMBER {
-                        $$.code = //empty?
-                        $$.ret_name = to_string($1);
+                        $$.code = to_string($1);
                     };
 expressions:        expression COMMA expressions {
                         stringstream ss;
