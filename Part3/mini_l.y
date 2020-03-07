@@ -16,10 +16,6 @@
     int yyerror(char *s);
     int yylex(void);
     extern FILE* yyin;
-    struct nonTerm {
-        string code;
-        string ret_name;
-    }
     //function for label (just return string "label n")
     //same for tempvar^
     //may need struct for operators
@@ -73,17 +69,40 @@
 %union {
     int num;
     char* id;
-    nonTerm* nterm;
+    struct nonTerm {
+        string code;
+        string ret_name;
+        string var_name;
+    } nterm;
 }
 
 %%
 //Actual output done in prog_start
-prog_start:         functions {};
-functions:          function functions {}
-                    | /*epsilon*/ {};
+prog_start:         functions {
+                        stringstream ss;
+                        ss << $1.code;
+                        $$.code = ss.str();
+                        $$.ret_name = "";
+                    };
+functions:          function functions {
+                        stringstream ss;
+                        ss << $1.code << $2.code;
+                        $$.code = ss.str();
+                        $$.ret_name = "";
+                    }
+                    | /*epsilon*/ {
+                        $$.code = "";
+                        $$.ret_name = "";
+                    };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
                         stringstream ss;
-                        ss << "func" << $2.
+                        ss << "func" << $2.ret_name << "\n";
+                        ss << $5.code;
+                        ss << $8.code;
+                        ss << $11.code;
+                        ss << "endfunc" << "\n";
+                        $$.code = ss.str();
+                        $$.ret_name = "";
                     };
 declaration:        identifiers COLON INTEGER { //done
                         stringstream ss;
@@ -94,6 +113,8 @@ declaration:        identifiers COLON INTEGER { //done
                             ss << ". " << hold << "\n";
                             ss << "= " << hold << ", " << $3 << "\n";
                         }
+                        $$.code = ss.str();
+                        $$.ret_name = "";
                     }
                     | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER { //done
                         stringstream ss;
@@ -103,12 +124,54 @@ declaration:        identifiers COLON INTEGER { //done
                         while(ids >> hold) {
                             ss << ".[] " << hold << ", " << $4.code << "\n";
                         }
+                        $$.code = ss.str();
+                        $$.ret_name = "";
                     };
-declarations:       declaration SEMICOLON declarations {}
-                    | /*epsilon*/ {};
-statement:          var ASSIGN expression {}
-                    | IF bool_exp THEN statements ENDIF {}
-                    | IF bool_exp THEN statements ELSE statements ENDIF {}
+declarations:       declaration SEMICOLON declarations {
+                        stringstream ss;
+                        ss << $1.code << $3.code << "\n";
+                        $$.code = ss.str();
+                        $$.ret_name = "";
+                    }
+                    | /*epsilon*/ {
+                        $$.code = "";
+                        $$.ret_name = "";
+                    };
+statement:          var ASSIGN expression {
+                        stringstream ss;
+                        ss << $1.code;
+                        ss << $3.code;
+                        ss << "= " << $1.ret_name << ", " << $3.ret_name << "\n";
+                    }
+                    | IF bool_exp THEN statements ENDIF {
+                        string label0 = make_label();
+                        string label1 = make_label();
+                        stringstream ss;
+                        ss << $2.code;
+                        ss << "?:= " << label0 << $2.ret_name << "\n";
+                        ss << ":= " << label1;
+                        ss << ": " << label0;
+                        ss << $4.code;
+                        ss << ": " << label1;
+                        $$.code = ss.str();
+                        $$.ret_name = "";
+                    }
+                    | IF bool_exp THEN statements ELSE statements ENDIF {
+                        string label0 = make_label();
+                        string label1 = make_label();
+                        string label2 = make_label();
+                        stringstream ss;
+                        ss << $2.code;
+                        ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
+                        ss << ":= " << label1;
+                        ss << ": " << label0;
+                        ss << $4.code;
+                        ss << ":= " << label2;
+                        ss << ": " << label1;
+                        ss << $6.code;
+                        ss << ": " << label2;
+                        $$.code = ss.str();
+                    }
                     | WHILE bool_exp BEGINLOOP statements ENDLOOP {}
                     | DO BEGINLOOP statements ENDLOOP WHILE bool_exp {}
                     | FOR var ASSIGN number SEMICOLON bool_exp SEMICOLON var ASSIGN expression BEGINLOOP statements ENDLOOP {}
@@ -123,26 +186,23 @@ bool_exp:           relation_and_exp OR relation_and_exp {}
 relation_and_exp:   relation_exp AND relation_exp {}
                     | relation_exp {};
 relation_exp:       nots expression comp expression {
-                        string temp_var1 = make_temp();
-                        string temp_var2 = make_temp();
                         stringstream ss;
-                        ss << ". " << temp_var1 << "\n";
-                        ss << $3.ret_name << temp_var1 << ", " << $2.code << ", " << $4.code << "\n";
-                        ss << ". " << temp_var2 << "\n";
-                        ss << "! " << temp_var2 << ", " << temp_var1 << "\n";
+                        ss << $2.code;
+                        ss << $4.code;
+                        ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
                         $$.code = ss.str();
+                        $$.ret_name = "";
                     }
                     | nots TRUE {
-                        $$.code = //empty?
+                        $$.code = "";
                         $$.ret_name = "1";
                     }
                     | nots FALSE {
-                        $$.code = //empty?
+                        $$.code = "";
                         $$.ret_name = "0";
                     }
                     | nots L_PAREN bool_exp R_PAREN {
-                        $$.code = $2.code;
-                        $$.ret_name = $2.ret_name;
+
                     };
 nots:               NOT {
                         string temp_var = make_temp();
@@ -151,24 +211,33 @@ nots:               NOT {
                         $$.code = ss;
                         $$.ret_name = "! ";
                     };
-                    | /*epsilon*/ {};
+                    | /*epsilon*/ {
+                        $$.ret_name = "";
+                        $$.code = "";
+                    };
 comp:               EQ {
                         $$.ret_name = "== ";
+                        $$.code = "";
                     }
                     | NEQ {
                         $$.ret_name = "!= ";
+                        $$.code = "";
                     }
                     | LT {
                         $$.ret_name = "< ";
+                        $$.code = "";
                     }
                     | GT {
                         $$.ret_name = "> ";
+                        $$.code = "";
                     }
                     | LTE {
                         $$.ret_name = "<= ";
+                        $$.code = "";
                     }
                     | GTE {
                         $$.ret_name = ">= ";
+                        $$.code = "";
                     };
 expression:         multiplicative_expression {
                         $$.code = $1.code;
@@ -230,11 +299,15 @@ term:               NEG term_num {}
                         stringstream ss;
                         ss << $3.code;
                         ss << ". " << tempvar << "\n";
-                        ss <<
 
                     };
 term_num:           var {}
-                    | number {}
+                    | number {
+                        stringstream ss;
+                        ss << $1.ret_name;
+                        $$.ret_name = ss;
+                        $$.code = "";
+                    }
                     | L_PAREN expression R_PAREN {
                         $$.code = $2.code;
                         $$.ret_name = $2.ret_name;
@@ -242,41 +315,49 @@ term_num:           var {}
                     | var COMMA vars {};
 vars:               var {}
                     | var COMMA vars {};
-var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {}
+var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {
+                        stringstream ss;
+                        ss << $3.code;
+                        ss << $1.ret_name;
+                    }
                     | identifier {
-                        $$.code = //empty?
+                        $$.code = "";
                         $$.ret_name = $1.ret_name;
                     };
 identifiers:        identifier COMMA identifiers { //done
                         stringstream ss;
                         ss << $1.ret_name << " " << $3.code;
                         $$.code = ss;
+                        $$.ret_name = "";
                     }
                     | identifier { //done
+                        $$.code = $1.code;
                         $$.ret_name = $1.ret_name;
                     };
 identifier:         IDENT { //done
+                        $$.code = $1;
                         $$.ret_name = $1;
                     };
 number:             NUMBER {
-                        $$.code = to_string($1);
+                        $$.ret_name = to_string($1);
+                        $$.code = "";
                     };
 expressions:        expression COMMA expressions {
                         stringstream ss;
                         ss << $1.code << "param " << $1.ret_name << "\n";
                         ss << "$3.code";
                         $$.code = ss.str();
-                        $$ret_name = //empty?
+                        $$.ret_name = "";
                     }
                     | expression {
                         stringstream ss;
                         ss << $1.code << "param " << $1.ret_name << "\n";
                         $$.code = ss.str();
-                        $$.ret_name = //empty?
+                        $$.ret_name = "";
                     }
                     | /*epsilon*/ {
-                        $$.code = //empty?
-                        $$.ret_name = //empty?
+                        $$.code = "";
+                        $$.ret_name = "";
                     };
 
 %%
