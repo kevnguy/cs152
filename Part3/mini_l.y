@@ -111,7 +111,7 @@ declaration:        identifiers COLON INTEGER { //done
                         stringstream ids(temp);
                         while(ids >> hold) {
                             ss << ". " << hold << "\n";
-                            ss << "= " << hold << ", " << $3 << "\n";
+                            
                         }
                         $$.code = ss.str();
                         $$.ret_name = "";
@@ -122,7 +122,7 @@ declaration:        identifiers COLON INTEGER { //done
                         string temp = $1.code;
                         stringstream ids(temp);
                         while(ids >> hold) {
-                            ss << ".[] " << hold << ", " << $4.code << "\n";
+                            ss << ".[] " << hold << ", " << $5.ret_name << "\n";
                         }
                         $$.code = ss.str();
                         $$.ret_name = "";
