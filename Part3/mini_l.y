@@ -87,92 +87,94 @@ prog_start:         functions {
                         cout << $1.code;
                     };
 functions:          function functions {
-                        stringstream ss;
-                        ss << $1.code << $2.code;
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        $$.code = "functions";
+                        // stringstream ss;
+                        // ss << $1.code << $2.code;
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     }
                     | /*epsilon*/ {
-                        $$.code = "";
-                        $$.ret_name = "";
+                        $$.code = "epsilon";
+                        // $$.code = "";
+                        // $$.ret_name = "";
                     };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
-                        stringstream ss;
-                        ss << "func" << $2.ret_name << "\n";
-                        ss << $5.code;
-                        ss << $8.code;
-                        ss << $11.code;
-                        ss << "endfunc" << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // stringstream ss;
+                        // ss << "func" << $2.ret_name << "\n";
+                        // ss << $5.code;
+                        // ss << $8.code;
+                        // ss << $11.code;
+                        // ss << "endfunc" << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     };
 declaration:        identifiers COLON INTEGER { //done
-                        stringstream ss;
-                        string hold;
-                        string temp = $1.code;
-                        stringstream ids(temp);
-                        while(ids >> hold) {
-                            ss << ". " << hold << "\n";
+                        // stringstream ss;
+                        // string hold;
+                        // string temp = $1.code;
+                        // stringstream ids(temp);
+                        // while(ids >> hold) {
+                        //     ss << ". " << hold << "\n";
                             
-                        }
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // }
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     }
                     | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER { //done
-                        stringstream ss;
-                        string hold;
-                        string temp = $1.code;
-                        stringstream ids(temp);
-                        while(ids >> hold) {
-                            ss << ".[] " << hold << ", " << $5.ret_name << "\n";
-                        }
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // stringstream ss;
+                        // string hold;
+                        // string temp = $1.code;
+                        // stringstream ids(temp);
+                        // while(ids >> hold) {
+                        //     ss << ".[] " << hold << ", " << $5.ret_name << "\n";
+                        // }
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     };
 declarations:       declaration SEMICOLON declarations {
-                        stringstream ss;
-                        ss << $1.code << $3.code << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // stringstream ss;
+                        // ss << $1.code << $3.code << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     }
                     | /*epsilon*/ {
-                        $$.code = "";
-                        $$.ret_name = "";
+                        // $$.code = "";
+                        // $$.ret_name = "";
                     };
 statement:          var ASSIGN expression {
-                        stringstream ss;
-                        ss << $1.code;
-                        ss << $3.code;
-                        ss << "= " << $1.ret_name << ", " << $3.ret_name << "\n";
+                        // stringstream ss;
+                        // ss << $1.code;
+                        // ss << $3.code;
+                        // ss << "= " << $1.ret_name << ", " << $3.ret_name << "\n";
                     }
                     | IF bool_exp THEN statements ENDIF {
-                        string label0 = make_label();
-                        string label1 = make_label();
-                        stringstream ss;
-                        ss << $2.code;
-                        ss << "?:= " << label0 << $2.ret_name << "\n";
-                        ss << ":= " << label1;
-                        ss << ": " << label0;
-                        ss << $4.code;
-                        ss << ": " << label1;
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // string label0 = make_label();
+                        // string label1 = make_label();
+                        // stringstream ss;
+                        // ss << $2.code;
+                        // ss << "?:= " << label0 << $2.ret_name << "\n";
+                        // ss << ":= " << label1;
+                        // ss << ": " << label0;
+                        // ss << $4.code;
+                        // ss << ": " << label1;
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     }
                     | IF bool_exp THEN statements ELSE statements ENDIF {
-                        string label0 = make_label();
-                        string label1 = make_label();
-                        string label2 = make_label();
-                        stringstream ss;
-                        ss << $2.code;
-                        ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
-                        ss << ":= " << label1;
-                        ss << ": " << label0;
-                        ss << $4.code;
-                        ss << ":= " << label2;
-                        ss << ": " << label1;
-                        ss << $6.code;
-                        ss << ": " << label2;
-                        $$.code = ss.str();
+                        // string label0 = make_label();
+                        // string label1 = make_label();
+                        // string label2 = make_label();
+                        // stringstream ss;
+                        // ss << $2.code;
+                        // ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
+                        // ss << ":= " << label1;
+                        // ss << ": " << label0;
+                        // ss << $4.code;
+                        // ss << ":= " << label2;
+                        // ss << ": " << label1;
+                        // ss << $6.code;
+                        // ss << ": " << label2;
+                        // $$.code = ss.str();
                     }
                     | WHILE bool_exp BEGINLOOP statements ENDLOOP {}
                     | DO BEGINLOOP statements ENDLOOP WHILE bool_exp {}
@@ -187,182 +189,182 @@ bool_exp:           relation_and_exp OR relation_and_exp {}
                     | relation_and_exp {};
 relation_and_exp:   relation_exp AND relation_exp {}
                     | relation_exp {
-                        $$.code = $1.code;
-                        $$.ret_name = "";
+                        // $$.code = $1.code;
+                        // $$.ret_name = "";
                     };
 relation_exp:       nots expression comp expression {
-                        stringstream ss;
-                        ss << $2.code;
-                        ss << $4.code;
-                        ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // stringstream ss;
+                        // ss << $2.code;
+                        // ss << $4.code;
+                        // ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     }
                     | nots TRUE {
-                        $$.code = "";
-                        $$.ret_name = "1";
+                        // $$.code = "";
+                        // $$.ret_name = "1";
                     }
                     | nots FALSE {
-                        $$.code = "";
-                        $$.ret_name = "0";
+                        // $$.code = "";
+                        // $$.ret_name = "0";
                     }
                     | nots L_PAREN bool_exp R_PAREN {
 
                     };
 nots:               NOT {
-                        string temp_var = make_temp();
-                        stringstream ss;
-                        ss << "! " << temp_var << ", ";
-                        $$.code = ss;
-                        $$.ret_name = "! ";
-                    };
+                        // string temp_var = make_temp();
+                        // stringstream ss;
+                        // ss << "! " << temp_var << ", ";
+                        // $$.code = ss;
+                        // $$.ret_name = "! ";
+                    }
                     | /*epsilon*/ {
-                        $$.ret_name = "";
-                        $$.code = "";
+                        /* $$.ret_name = "";
+                         $$.code = "";*/
                     };
 comp:               EQ {
-                        $$.ret_name = "== ";
-                        $$.code = "";
+                        // $$.ret_name = "== ";
+                        // $$.code = "";
                     }
                     | NEQ {
-                        $$.ret_name = "!= ";
-                        $$.code = "";
+                        // $$.ret_name = "!= ";
+                        // $$.code = "";
                     }
                     | LT {
-                        $$.ret_name = "< ";
-                        $$.code = "";
+                        // $$.ret_name = "< ";
+                        // $$.code = "";
                     }
                     | GT {
-                        $$.ret_name = "> ";
-                        $$.code = "";
+                        // $$.ret_name = "> ";
+                        // $$.code = "";
                     }
                     | LTE {
-                        $$.ret_name = "<= ";
-                        $$.code = "";
+                        // $$.ret_name = "<= ";
+                        // $$.code = "";
                     }
                     | GTE {
-                        $$.ret_name = ">= ";
-                        $$.code = "";
+                        // $$.ret_name = ">= ";
+                        // $$.code = "";
                     };
 expression:         multiplicative_expression {
-                        $$.code = $1.code;
-                        $$.ret_name = $1.ret_name;
+                        // $$.code = $1.code;
+                        // $$.ret_name = $1.ret_name;
                     }
                     | multiplicative_expression ADD multiplicative_expression {
-                        string temp_var = make_temp();
-                        stringstream ss;
-                        ss << $1.code << $3.code;
-                        ss << ". " << temp_var << "\n"; //declare destination
-                        ss << "+ " << temp_var << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = temp_var;
+                        // string temp_var = make_temp();
+                        // stringstream ss;
+                        // ss << $1.code << $3.code;
+                        // ss << ". " << temp_var << "\n"; //declare destination
+                        // ss << "+ " << temp_var << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = temp_var;
                     }
                     | multiplicative_expression SUB multiplicative_expression {
-                        string temp_var = make_temp();
-                        stringstream ss;
-                        ss << $1.code << $3.code;
-                        ss << ". " << temp_var << "\n";
-                        ss << "- " << temp_var << ", " << "$1.ret_name" << ", " << $3.ret_name << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = temp_var;
+                        // string temp_var = make_temp();
+                        // stringstream ss;
+                        // ss << $1.code << $3.code;
+                        // ss << ". " << temp_var << "\n";
+                        // ss << "- " << temp_var << ", " << "$1.ret_name" << ", " << $3.ret_name << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = temp_var;
                     };
 multiplicative_expression: term {
-                        $$.code = $1.code;
-                        $$.ret_name = $1.ret_name;
+                        // $$.code = $1.code;
+                        // $$.ret_name = $1.ret_name;
                     }
                     | term MULT term {
-                        string temp_var = make_temp();
-                        stringstream ss;
-                        ss << $1.code << $3.code;
-                        ss << ". " << tempvar << "\n";
-                        ss << "* " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = temp_var;
+                        // string temp_var = make_temp();
+                        // stringstream ss;
+                        // ss << $1.code << $3.code;
+                        // ss << ". " << tempvar << "\n";
+                        // ss << "* " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = temp_var;
                     }
                     | term DIV term {
-                        string temp_var = make_temp();
-                        stringstream ss;
-                        ss << $1.code << $3.code;
-                        ss << ". " << tempvar << "\n";
-                        ss << "/ " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = temp_var;
+                        // string temp_var = make_temp();
+                        // stringstream ss;
+                        // ss << $1.code << $3.code;
+                        // ss << ". " << tempvar << "\n";
+                        // ss << "/ " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = temp_var;
                     }
                     | term MOD term {
-                        string temp_var = make_temp();
-                        stringstream ss;
-                        ss << $1.code << $3.code;
-                        ss << ". " << tempvar << "\n";
-                        ss << "% " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = temp_var;
+                        // string temp_var = make_temp();
+                        // stringstream ss;
+                        // ss << $1.code << $3.code;
+                        // ss << ". " << tempvar << "\n";
+                        // ss << "% " << tempvar << "," << $1.ret_name << "," << $3.ret_name << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = temp_var;
                     };
 term:               NEG term_num {}
                     | term_num {}
                     | identifier L_PAREN expressions R_PAREN { //possible check for undeclared
-                        string temp_var = make_temp();
-                        stringstream ss;
-                        ss << $3.code;
-                        ss << ". " << tempvar << "\n";
+                        // string temp_var = make_temp();
+                        // stringstream ss;
+                        // ss << $3.code;
+                        // ss << ". " << tempvar << "\n";
 
                     };
 term_num:           var {}
                     | number {
-                        stringstream ss;
-                        ss << $1.ret_name;
-                        $$.ret_name = ss;
-                        $$.code = "";
+                        // stringstream ss;
+                        // ss << $1.ret_name;
+                        // $$.ret_name = ss;
+                        // $$.code = "";
                     }
                     | L_PAREN expression R_PAREN {
-                        $$.code = $2.code;
-                        $$.ret_name = $2.ret_name;
+                        // $$.code = $2.code;
+                        // $$.ret_name = $2.ret_name;
                     }
                     | var COMMA vars {};
 vars:               var {}
                     | var COMMA vars {};
 var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {
-                        stringstream ss;
-                        ss << $3.code;
-                        ss << $1.ret_name;
+                        // stringstream ss;
+                        // ss << $3.code;
+                        // ss << $1.ret_name;
                     }
                     | identifier {
-                        $$.code = "";
-                        $$.ret_name = $1.ret_name;
+                        // $$.code = "";
+                        // $$.ret_name = $1.ret_name;
                     };
 identifiers:        identifier COMMA identifiers { //done
-                        stringstream ss;
-                        ss << $1.ret_name << " " << $3.code;
-                        $$.code = ss;
-                        $$.ret_name = "";
+                        // stringstream ss;
+                        // ss << $1.ret_name << " " << $3.code;
+                        // $$.code = ss;
+                        // $$.ret_name = "";
                     }
                     | identifier { //done
-                        $$.code = $1.code;
-                        $$.ret_name = $1.ret_name;
+                        // $$.code = $1.code;
+                        // $$.ret_name = $1.ret_name;
                     };
 identifier:         IDENT { //done
-                        $$.code = $1;
-                        $$.ret_name = $1;
+                        // $$.code = $1;
+                        // $$.ret_name = $1;
                     };
 number:             NUMBER {
-                        $$.ret_name = to_string($1);
-                        $$.code = "";
+                        // $$.ret_name = to_string($1);
+                        // $$.code = "";
                     };
 expressions:        expression COMMA expressions {
-                        stringstream ss;
-                        ss << $1.code << "param " << $1.ret_name << "\n";
-                        ss << "$3.code";
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // stringstream ss;
+                        // ss << $1.code << "param " << $1.ret_name << "\n";
+                        // ss << "$3.code";
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     }
                     | expression {
-                        stringstream ss;
-                        ss << $1.code << "param " << $1.ret_name << "\n";
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        // stringstream ss;
+                        // ss << $1.code << "param " << $1.ret_name << "\n";
+                        // $$.code = ss.str();
+                        // $$.ret_name = "";
                     }
                     | /*epsilon*/ {
-                        $$.code = "";
-                        $$.ret_name = "";
+                        // $$.code = "";
+                        // $$.ret_name = "";
                     };
 
 %%
