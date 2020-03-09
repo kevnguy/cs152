@@ -1,12 +1,12 @@
 /* MINI-L Parser for CS152 Part 2*/
-%code requires{
+/*%code requires{
     #include <string>
     using namespace std;
     struct nonTerm {
         string code;
         string ret_name;
     }
-}
+}*/
 
 %{
     #include <iostream>
@@ -71,7 +71,11 @@
 %union {
     int num;
     char* id;
-    nonTerm nterm;
+    struct nonTerm {
+        char* code;
+        char* ret_name;
+        char* var_name;
+    } nterm;
 }
 
 %%
