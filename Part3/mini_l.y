@@ -9,9 +9,13 @@
 }*/
 
 %{
+    #define YY_NO_UNPUT
     #include <iostream>
+    #include <stdio.h>
     #include <string>
     #include <sstream>
+    #include <cstring>
+    #include <stdlib.h>
     #include "y.tab.h"
     using namespace std;
     int yyerror(string s);
@@ -81,10 +85,7 @@
 %%
 //Actual output done in prog_start
 prog_start:         functions {
-                        stringstream ss;
-                        ss << $1.code;
-                        $$.code = ss.str();
-                        $$.ret_name = "";
+                        cout << $1.code;
                     };
 functions:          function functions {
                         stringstream ss;
