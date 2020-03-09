@@ -16,7 +16,7 @@
     #include <sstream>
     #include <cstring>
     #include <stdlib.h>
-    #include "y.tab.h"
+    //#include "y.tab.h"
     using namespace std;
     int yyerror(string s);
     int yyerror(char *s);
@@ -30,7 +30,7 @@
 %union {
     int num;
     char* id;
-    struct nonTerm {
+    struct {
         char* code;
         char* ret_name;
         char* var_name;
@@ -210,6 +210,18 @@ relation_exp:       nots expression comp expression {
                     }
                     | nots L_PAREN bool_exp R_PAREN {
 
+                   }
+		    | expression comp expression{
+
+                    }
+                    | TRUE {
+
+                    }
+                    | FALSE {
+
+                    }
+                    | L_PAREN bool_exp R_PAREN{
+
                     };
 nots:               NOT {
                         // string temp_var = make_temp();
@@ -217,10 +229,6 @@ nots:               NOT {
                         // ss << "! " << temp_var << ", ";
                         // $$.code = ss;
                         // $$.ret_name = "! ";
-                    }
-                    | /*epsilon*/ {
-                        /* $$.ret_name = "";
-                         $$.code = "";*/
                     };
 comp:               EQ {
                         // $$.ret_name = "== ";
@@ -307,7 +315,10 @@ term:               NEG term_num {}
                         // ss << $3.code;
                         // ss << ". " << tempvar << "\n";
 
-                    };
+                    }
+		    | identifier L_PAREN R_PAREN {
+		    
+		    };
 term_num:           var {}
                     | number {
                         // stringstream ss;
@@ -318,8 +329,7 @@ term_num:           var {}
                     | L_PAREN expression R_PAREN {
                         // $$.code = $2.code;
                         // $$.ret_name = $2.ret_name;
-                    }
-                    | var COMMA vars {};
+                    };
 vars:               var {}
                     | var COMMA vars {};
 var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {
@@ -360,10 +370,6 @@ expressions:        expression COMMA expressions {
                         // stringstream ss;
                         // ss << $1.code << "param " << $1.ret_name << "\n";
                         // $$.code = ss.str();
-                        // $$.ret_name = "";
-                    }
-                    | /*epsilon*/ {
-                        // $$.code = "";
                         // $$.ret_name = "";
                     };
 
