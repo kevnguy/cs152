@@ -11,6 +11,7 @@
 %{
     #include <iostream>
     #include <string>
+    #include <sstream>
     #include "y.tab.h"
     using namespace std;
     int yyerror(string s);
