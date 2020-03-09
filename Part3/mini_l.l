@@ -1,6 +1,8 @@
 %{
    #include <unordered_map>
    #include <string>
+   #include <stdio.h>
+   #include <iostream>
    #include "mini_l.tab.h"
 
    using namespace std;
@@ -100,13 +102,13 @@ COMMENT [#]
 
 {LETTER} {
     currPos += yyleng;
-    yylval.id = yytext;
+    yylval.id = strdup(yytext);
     return IDENT;
 }
 
 {LETTER}({LETTER}|{DIGIT}|{UNDERSCORE})*({LETTER}|{DIGIT}) {
     currPos += yyleng;
-    yylval.id = yytext;
+    yylval.id = strdup(yytext);
     return IDENT;
 }
 
