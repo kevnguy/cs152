@@ -11,6 +11,7 @@
 %{
     #include <iostream>
     #include <string>
+    #include "y.tab.h"
     using namespace std;
     int yyerror(string s);
     int yyerror(char *s);
@@ -70,9 +71,9 @@
     int num;
     char* id;
     struct nonTerm {
-        string code;
-        string ret_name;
-        string var_name;
+        std::string code;
+        std::string ret_name;
+        std::string var_name;
     } nterm;
 }
 
@@ -184,7 +185,10 @@ statements:         statement SEMICOLON statements {}
 bool_exp:           relation_and_exp OR relation_and_exp {}
                     | relation_and_exp {};
 relation_and_exp:   relation_exp AND relation_exp {}
-                    | relation_exp {};
+                    | relation_exp {
+                        $$.code = $1.code;
+                        $$.ret_name = "";
+                    };
 relation_exp:       nots expression comp expression {
                         stringstream ss;
                         ss << $2.code;
