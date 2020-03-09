@@ -27,6 +27,15 @@
     //may need struct for operators
 %}
 
+%union {
+    int num;
+    char* id;
+    struct nonTerm {
+        char* code;
+        char* ret_name;
+        char* var_name;
+    } nterm;
+}
 
 %start prog_start
 
@@ -71,16 +80,6 @@
 %type<nterm> identifier
 %type<nterm> number
 %type<nterm> expressions
-
-%union {
-    int num;
-    char* id;
-    struct nonTerm {
-        char* code;
-        char* ret_name;
-        char* var_name;
-    } nterm;
-}
 
 %%
 //Actual output done in prog_start
