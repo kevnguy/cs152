@@ -82,20 +82,20 @@
 %type<nterm> expressions
 
 %%
-//Actual output done in prog_start
+  //Actual output done in prog_start
 prog_start:         functions {
                         cout << $1.code;
                     };
 functions:          function functions {
                         $$.code = "functions";
-                        // stringstream ss;
+			// stringstream ss;
                         // ss << $1.code << $2.code;
                         // $$.code = ss.str();
                         // $$.ret_name = "";
                     }
                     | /*epsilon*/ {
                         $$.code = "epsilon";
-                        // $$.code = "";
+			// $$.code = "";
                         // $$.ret_name = "";
                     };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
@@ -354,6 +354,7 @@ identifiers:        identifier COMMA identifiers { //done
 identifier:         IDENT { //done
                         // $$.code = $1;
                         // $$.ret_name = $1;
+			cout << "This is an ident" << endl;
                     };
 number:             NUMBER {
                         // $$.ret_name = to_string($1);
