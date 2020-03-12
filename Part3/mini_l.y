@@ -87,11 +87,11 @@ prog_start:         functions {
                         cout << $1.code;
                     };
 functions:          function functions {
-                        $$.code = "functions";
-                        // stringstream ss;
+                        stringstream ss;
                         // ss << $1.code << $2.code;
-                        // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        ss << "hello world" << endl; 
+                        $$.code = ss.str();
+                        $$.ret_name = "";
                     }
                     | /*epsilon*/ {
                         $$.code = "epsilon";
@@ -348,12 +348,12 @@ identifiers:        identifier COMMA identifiers { //done
                         // $$.ret_name = "";
                     }
                     | identifier { //done
-                        // $$.code = $1.code;
-                        // $$.ret_name = $1.ret_name;
+                        $$.code = "";
+                        $$.ret_name = $1.ret_name;
                     };
 identifier:         IDENT { //done
-                        // $$.code = $1;
-                        // $$.ret_name = $1;
+                        $$.code = "";
+                        $$.ret_name = $1;
                     };
 number:             NUMBER {
                         // $$.ret_name = to_string($1);
