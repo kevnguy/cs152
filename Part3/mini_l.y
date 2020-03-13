@@ -16,15 +16,14 @@
     #include <sstream>
     #include <cstring>
     #include <stdlib.h>
+    #include <unordered_set>
     //#include "y.tab.h"
     using namespace std;
     int yyerror(string s);
     int yyerror(char *s);
     int yylex(void);
     extern FILE* yyin;
-    //function for label (just return string "label n")
-    //same for tempvar^
-    //may need struct for operators
+    unordered_set<string> predefFuncs;
 %}
 
 %union {
@@ -87,38 +86,42 @@ prog_start:         functions {
                         cout << $1.code;
                     };
 functions:          function functions {
-			            stringstream ss;
-                        // ss << $1.code << $2.code;
-                        ss << "hello world" << endl; 
-                        $$.code = ss.str();
+			stringstream ss;
+                        ss << $1.code << $2.code;
+                        std::string temp = ss.str(); 
+                        $$.code = strdup(temp.c_str());
                         $$.ret_name = "";
                     }
                     | /*epsilon*/ {
-                        $$.code = "epsilon";
-			// $$.code = "";
-                        // $$.ret_name = "";
+			$$.code = "";
+                        $$.ret_name = "";
                     };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
-                        // stringstream ss;
-                        // ss << "func" << $2.ret_name << "\n";
-                        // ss << $5.code;
-                        // ss << $8.code;
-                        // ss << $11.code;
-                        // ss << "endfunc" << "\n";
-                        // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        stringstream ss;
+                        ss << "func ";
+			if(predefFuncs.find($2.ret_name) == predefFuncs.end()) {
+				predefFuncs.insert($2.ret_name);
+				ss << $2.ret_name << "\n";
+			}
+			else {cout << "\nError: function identifier already in use\n";}
+			//ss << $5.code;
+                        //ss << $8.code;
+                        //ss << $11.code;
+                        ss << "endfunc" << "\n";
+                        string temp = ss.str();
+			$$.code = strdup(temp.c_str());
+                        $$.ret_name = "";
                     };
 declaration:        identifiers COLON INTEGER { //done
-                        // stringstream ss;
-                        // string hold;
-                        // string temp = $1.code;
-                        // stringstream ids(temp);
-                        // while(ids >> hold) {
-                        //     ss << ". " << hold << "\n";
-                            
-                        // }
-                        // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        stringstream ss;
+                        string hold;
+                        string temp = $1.code;
+                        stringstream ids(temp);
+                        while(ids >> hold) {
+                            ss << ". " << hold << "\n";   
+                        }
+                        $$.code = ss.str();
+                        $$.ret_name = "";
                     }
                     | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER { //done
                         // stringstream ss;
@@ -132,14 +135,15 @@ declaration:        identifiers COLON INTEGER { //done
                         // $$.ret_name = "";
                     };
 declarations:       declaration SEMICOLON declarations {
-                        // stringstream ss;
-                        // ss << $1.code << $3.code << "\n";
-                        // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        stringstream ss;
+                        ss << $1.code << $3.code << "\n";
+			string temp = ss.str();
+                        $$.code = strdub(temp.c_str());
+                        $$.ret_name = "";
                     }
                     | /*epsilon*/ {
-                        // $$.code = "";
-                        // $$.ret_name = "";
+                        $$.code = "";
+                        $$.ret_name = "";
                     };
 statement:          var ASSIGN expression {
                         // stringstream ss;
