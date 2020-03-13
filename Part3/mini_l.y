@@ -34,7 +34,7 @@
         char* code;
         char* ret_name;
         char* var_name;
-        vector<string> idents;
+        vector<char*> idents;
     } nterm;
 }
 
@@ -126,7 +126,7 @@ declaration:        identifiers COLON INTEGER { //done
                         string stringIDs = $1.ret_name;
                         stringstream ids(stringIDs);
                         while(ids >> id) {
-                            ($$.idents).push_back(id);
+                            ($$.idents).push_back(strdup(id.c_str());
                             ss << ". " << id << "\n";   
                         }
                         string temp = ss.str();
