@@ -373,7 +373,7 @@ relation_exp:       nots expression comp expression {
 		            | expression comp expression {
                         stringstream ss;
                         ss << $2.code;
-                        ss << $4.code;
+                        ss << $3.code;
                         ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
