@@ -108,7 +108,7 @@ functions:          function functions {
                         $$.ret_name = strdup("");
                     }
                     | /*epsilon*/ {
-			            $$.code = "";
+			            $$.code = strdup("");
                         $$.ret_name = strdup("");
                     };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
@@ -268,7 +268,7 @@ declarations:       declaration SEMICOLON declarations {
                         $$.ret_name = strdup("");
                     }
                     | /*epsilon*/ {
-                        $$.code = "";
+                        $$.code = strdup("");
                         $$.ret_name = strdup("");
                     };
 statement:          var ASSIGN expression {
@@ -348,7 +348,26 @@ statement:          var ASSIGN expression {
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                     }
-                    | DO BEGINLOOP statements ENDLOOP WHILE bool_exp {}
+                    | DO BEGINLOOP statements ENDLOOP WHILE bool_exp {
+                        stringstream ss;
+                        string label0 = make_label();
+                        string label1 = make_label();
+                        string statementCode = $3.code;
+                        size_t contPos = statementCode.find("continue");
+                        while (contPos != string::npos) {
+                            statementCode.replace(contPos, 8, ":= " + label1);
+                            contPos = statementCode.find("continue");
+                        }
+                        ss << ": ";
+                        ss << label0 << "\n";
+                        ss << statementCode;
+                        ss << ": " << label1 << "\n";
+                        ss << $6.code;
+                        ss << "?:= " << label0 << ", ";
+                        ss << $6.ret_name << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                    }
                     | FOR var ASSIGN number SEMICOLON bool_exp SEMICOLON var ASSIGN expression BEGINLOOP statements ENDLOOP {}
                     | READ vars {}
                     | WRITE vars {}
@@ -361,7 +380,7 @@ statements:         statement SEMICOLON statements {
                         $$.code = strdup(temp.c_str());
                     }
                     | /*epsilon*/ {
-                        $$.code = "";
+                        $$.code = strdup("");
                     };
 bool_exp:           relation_and_exp OR relation_and_exp {}
                     | relation_and_exp {
@@ -382,11 +401,11 @@ relation_exp:       nots expression comp expression {
                         $$.ret_name = strdup("");
                     }
                     | nots TRUE {
-                        // $$.code = "";
+                        // $$.code = strdup("");
                         // $$.ret_name = "1";
                     }
                     | nots FALSE {
-                        // $$.code = "";
+                        // $$.code = strdup("");
                         // $$.ret_name = "0";
                     }
                     | nots L_PAREN bool_exp R_PAREN {
@@ -418,28 +437,28 @@ nots:               NOT {
                         // $$.ret_name = "! ";
                     };
 comp:               EQ {
-                        $$.ret_name = "== ";
-                        $$.code = "";
+                        $$.ret_name = strdup("== ");
+                        $$.code = strdup("");
                     }
                     | NEQ {
-                        $$.ret_name = "!= ";
-                        $$.code = "";
+                        $$.ret_name = strdup("!= ");
+                        $$.code = strdup("");
                     }
                     | LT {
-                        $$.ret_name = "< ";
-                        $$.code = "";
+                        $$.ret_name = strdup("< ");
+                        $$.code = strdup("");
                     }
                     | GT {
-                        $$.ret_name = "> ";
-                        $$.code = "";
+                        $$.ret_name = strdup("> ");
+                        $$.code = strdup("");
                     }
                     | LTE {
-                        $$.ret_name = "<= ";
-                        $$.code = "";
+                        $$.ret_name = strdup("<= ");
+                        $$.code = strdup("");
                     }
                     | GTE {
-                        $$.ret_name = ">= ";
-                        $$.code = "";
+                        $$.ret_name = strdup(">= ");
+                        $$.code = strdup("");
                     };
 expression:         multiplicative_expression {
                         // $$.code = $1.code;
@@ -511,7 +530,7 @@ term_num:           var {}
                         // stringstream ss;
                         // ss << $1.ret_name;
                         // $$.ret_name = ss;
-                        // $$.code = "";
+                        // $$.code = strdup("");
                     }
                     | L_PAREN expression R_PAREN {
                         // $$.code = $2.code;
@@ -525,7 +544,7 @@ var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {
                         // ss << $1.ret_name;
                     }
                     | identifier {
-                        // $$.code = "";
+                        // $$.code = strdup("");
                         // $$.ret_name = $1.ret_name;
                     };
 identifiers:        identifier COMMA identifiers { //done
@@ -533,21 +552,21 @@ identifiers:        identifier COMMA identifiers { //done
                         ss << $1.ret_name << "/" << $3.code;
                         string temp = ss.str();
                         $$.ret_name = strdup(temp.c_str());
-                        $$.code = "";
+                        $$.code = strdup("");
                     }
                     | identifier { //done
-                        $$.code = "";
+                        $$.code = strdup("");
                         $$.ret_name = $1.ret_name;
                     };
 identifier:         IDENT { //done
-                        $$.code = "";
+                        $$.code = strdup("");
                         string temp = $1;
                         $$.ret_name = strdup(temp.c_str());
                     };
 number:             NUMBER {
                         string temp = to_string($1);
                         $$.ret_name = strdup(temp.c_str());
-                        $$.code = "";
+                        $$.code = strdup("");
                     };
 expressions:        expression COMMA expressions {
                         // stringstream ss;
