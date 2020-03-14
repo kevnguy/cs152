@@ -105,11 +105,11 @@ functions:          function functions {
                         ss << $1.code << $2.code;
                         std::string temp = ss.str(); 
                         $$.code = strdup(temp.c_str());
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                     }
                     | /*epsilon*/ {
 			            $$.code = "";
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                     };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
                         stringstream ss;
@@ -139,7 +139,7 @@ function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_
                         ss << "endfunc" << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                         };
 declaration:        identifiers COLON INTEGER { //done
                         stringstream ss;
@@ -174,7 +174,7 @@ declaration:        identifiers COLON INTEGER { //done
                             //temp.append("\n");
                         }
                         // $$.code = strdup(temp.c_str());
-                        // $$.ret_name = "";
+                        // $$.ret_name = strdup("");
 
                         // string id;
                         // string stringIDs = $1.ret_name;
@@ -185,7 +185,7 @@ declaration:        identifiers COLON INTEGER { //done
                         // }
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                     }
                     | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER { //done
                         stringstream ss;
@@ -258,18 +258,18 @@ declaration:        identifiers COLON INTEGER { //done
                         //     ss << ".[] " << hold << ", " << $5.ret_name << "\n";
                         // }
                         // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        // $$.ret_name = strdup("");
                     };
 declarations:       declaration SEMICOLON declarations {
                         stringstream ss;
                         ss << $1.code << $3.code;
 			            string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                     }
                     | /*epsilon*/ {
                         $$.code = "";
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                     };
 statement:          var ASSIGN expression {
                         stringstream ss;
@@ -370,7 +370,7 @@ bool_exp:           relation_and_exp OR relation_and_exp {}
 relation_and_exp:   relation_exp AND relation_exp {}
                     | relation_exp {
                         // $$.code = $1.code;
-                        // $$.ret_name = "";
+                        // $$.ret_name = strdup("");
                     };
 relation_exp:       nots expression comp expression {
                         stringstream ss;
@@ -379,7 +379,7 @@ relation_exp:       nots expression comp expression {
                         ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                     }
                     | nots TRUE {
                         // $$.code = "";
@@ -399,7 +399,7 @@ relation_exp:       nots expression comp expression {
                         ss << $2.ret_name << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        $$.ret_name = "";
+                        $$.ret_name = strdup("");
                     }
                     | TRUE {
 
@@ -554,13 +554,13 @@ expressions:        expression COMMA expressions {
                         // ss << $1.code << "param " << $1.ret_name << "\n";
                         // ss << "$3.code";
                         // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        // $$.ret_name = strdup("");
                     }
                     | expression {
                         // stringstream ss;
                         // ss << $1.code << "param " << $1.ret_name << "\n";
                         // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        // $$.ret_name = strdup("");
                     };
 
 %%
