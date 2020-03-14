@@ -662,7 +662,7 @@ vars:	    var COMMA vars {
                 if ($1.is_arr) {
                     ss << ".[]| ";
                 } else {
-                    ss << ".| ";
+                    ss << "./ ";
                 }
                 ss << $1.ret_name << "\n" << $3.code;
                 string temp = ss.str();
@@ -675,7 +675,7 @@ vars:	    var COMMA vars {
                 if ($1.is_arr) {
                     ss << ".[]| ";
                 } else {
-                    ss << ".| ";
+                    ss << "./ ";
                 }
                 ss << $1.ret_name << "\n";
                 string temp = ss.str();
