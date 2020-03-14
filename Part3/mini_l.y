@@ -152,12 +152,12 @@ declaration:        identifiers COLON INTEGER { //done
                             rightP = identStrings.find("|", leftP);
                             ss << ". ";
                             //temp.append(". ");
-                            if(right == string::npos) {
+                            if(rightP == string::npos) {
                                 string id = identStrings.substr(leftP, rightP);
                                 if(reservedWords.find(id) != reservedWords.end()) {
                                     cout << "Identifier " << id << "'s name is reserved." << endl;
                                 }
-                                if(tempVars.find(id) != tempVars.end() || predefFuncs.find(ident) != predefFuncs.end()) {
+                                if(tempVars.find(id) != tempVars.end() || predefFuncs.find(id) != predefFuncs.end()) {
                                     cout << "Identifier " << id << " was previously declared." << endl;
                                 }
                                 else {
@@ -193,7 +193,7 @@ declaration:        identifiers COLON INTEGER { //done
                         //string temp;
                         bool exp = false;
                         while(!exp) {
-                            rightP = identStrings.find("/", left);
+                            rightP = identStrings.find("/", leftP);
                             ss << ".[] ";
                             //temp.append(".[] ");
                             if (rightP == string::npos) {
@@ -202,7 +202,7 @@ declaration:        identifiers COLON INTEGER { //done
                                     cout << "Id " << id << "'s name is reserved." << endl;
                                     //printf("Identifier %s's name is a reserved word.\n", ident.c_str());
                                 }
-                                if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
+                                if (predefFuncs.find(id) != predefFuncs.end() || tempVars.find(id) != tempVars.end()) {
                                     cout << "Id " << id << " has previously been declared" << endl;
                                     // printf("Identifier %s is previously declared.\n", ident.c_str());
                                 } else {
@@ -222,7 +222,7 @@ declaration:        identifiers COLON INTEGER { //done
                                     cout << "Id " << id << "is reserved." << endl;
                                     // printf("Identifier %s's name is a reserved word.\n", ident.c_str());
                                 }
-                                if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
+                                if (predefFuncs.find(id) != predefFuncs.end() || tempVars.find(id) != tempVars.end()) {
                                     cout << "Id " << id << "has been previously declared" << endl;
                                     // printf("Identifier %s is previously declared.\n", ident.c_str());
                                 } else {
@@ -233,7 +233,7 @@ declaration:        identifiers COLON INTEGER { //done
                                     tempVars[id] = id;
                                     arraySizes[id] = $5;
                                 }
-                                ss << ident;
+                                ss << id;
                                 // temp.append(ident);
                                 leftP = rightP + 1;
                             }
