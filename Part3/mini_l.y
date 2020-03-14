@@ -34,7 +34,7 @@
         char* code;
         char* ret_name;
         char* var_name;
-        vector<char*> idents;
+        char* paramIDs;
     } nterm;
 }
 
@@ -100,7 +100,6 @@ functions:          function functions {
                     };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
                         stringstream ss;
-                        vector<string> temp = $5.idents;
                         ss << "func ";
                         if(predefFuncs.find($2.ret_name) == predefFuncs.end()) {
                             predefFuncs.insert($2.ret_name);
@@ -110,12 +109,17 @@ function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_
                             ss << "\nError: function identifier already in use\n";
                         }
                         ss << $5.code;
-                        for(int i = 0; i < temp.size(); i++) {
-                            ss << "= " << temp.at(i) << ", $" << i << "\n";
-                        }
-                        //ss << $8.code;
-                        //ss << $11.code;
-                        ss << "endfunc" << "\n";
+			int count = 0;
+			string id;
+			if($5.paramIDs != NULL) {
+				string stringIDs = $5.paramIDs;
+				stringstream ids(stringIDs);
+				while(ids >> id) {
+					ss << "= " << id << ", $" << count << "\n";
+					++count;
+				}
+			}
+			ss << "endfunc" << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                         $$.ret_name = "";
@@ -126,11 +130,11 @@ declaration:        identifiers COLON INTEGER { //done
                         string stringIDs = $1.ret_name;
                         stringstream ids(stringIDs);
                         while(ids >> id) {
-                            ($$.idents).push_back(strdup(id.c_str());
                             ss << ". " << id << "\n";   
                         }
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
+			$$.paramIDs = $1.ret_name;
                         $$.ret_name = "";
                     }
                     | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER { //done
@@ -146,9 +150,9 @@ declaration:        identifiers COLON INTEGER { //done
                     };
 declarations:       declaration SEMICOLON declarations {
                         stringstream ss;
-                        ss << $1.code << $3.code << "\n";
-			            string temp = ss.str();
-                        $$.code = strdub(temp.c_str());
+                        ss << $1.code << $3.code;
+			string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
                         $$.ret_name = "";
                     }
                     | /*epsilon*/ {
@@ -272,7 +276,7 @@ expression:         multiplicative_expression {
                         // $$.code = $1.code;
                         // $$.ret_name = $1.ret_name;
                     }
-                    | multiplicative_expression ADD multiplicative_expression {
+                    | multiplicative_expression ADD expression {
                         // string temp_var = make_temp();
                         // stringstream ss;
                         // ss << $1.code << $3.code;
@@ -281,7 +285,7 @@ expression:         multiplicative_expression {
                         // $$.code = ss.str();
                         // $$.ret_name = temp_var;
                     }
-                    | multiplicative_expression SUB multiplicative_expression {
+                    | multiplicative_expression SUB expression {
                         // string temp_var = make_temp();
                         // stringstream ss;
                         // ss << $1.code << $3.code;
@@ -358,8 +362,9 @@ var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {
 identifiers:        identifier COMMA identifiers { //done
                         stringstream ss;
                         ss << $1.ret_name << " " << $3.code;
-                        $$.code = ss;
-                        $$.ret_name = "";
+                        string temp = ss.str();
+			$$.ret_name = strdup(temp.c_str());
+			$$.code = "";
                     }
                     | identifier { //done
                         $$.code = "";
