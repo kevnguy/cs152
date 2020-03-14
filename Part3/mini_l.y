@@ -311,9 +311,18 @@ statement:          var ASSIGN expression {
                         $$.code = strdup(temp.c_str());
                     }
                     | IF bool_exp THEN statements ELSE statements ENDIF {
-                        // string label0 = make_label();
-                        // string label1 = make_label();
-                        // string label2 = make_label();
+                        stringstream ss;
+                        string label0 = make_label();
+                        string label1 = make_label();
+                        ss << $2.code;
+                        ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
+                        ss << $6.code;
+                        ss << ":= " << label1 << "\n";
+                        ss << ": " << label0 << "\n";
+                        ss << $4.code;
+                        ss << ": " << label1 << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
                         // stringstream ss;
                         // ss << $2.code;
                         // ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
