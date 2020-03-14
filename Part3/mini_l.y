@@ -413,11 +413,34 @@ statements:         statement SEMICOLON statements {
                     | /*epsilon*/ {
                         $$.code = strdup("");
                     };
-bool_exp:           relation_and_exp OR relation_and_exp {}
+bool_exp:           relation_and_exp OR relation_and_exp {
+                        stringstream ss;
+                        string temp0 = make_temp();
+                        ss << $1.code;
+                        ss << $3.code;
+                        ss << ". " << temp0 << "\n";
+                        ss << "|| " << temp0 << ", ";
+                        ss << $1.ret_name << ", " << $3.ret_name << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                        $$.ret_name = strdup(temp0.c_str());
+                    }
                     | relation_and_exp {
-
+                        $$.code = $1.code;
+                        $$.ret_name = $1.ret_name;
                     };
-relation_and_exp:   relation_exp AND relation_exp {}
+relation_and_exp:   relation_exp AND relation_exp {
+                        stringstream ss;
+                        string temp0 = make_temp();
+                        ss << $1.code;
+                        ss << $3.code;
+                        ss << ". " << temp0 << "\n";
+                        ss << "&& " << temp0 << ", ";
+                        ss << $1.ret_name << ", " << $3.ret_name << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                        $$.ret_name = strdup(temp0.c_str());
+                    }
                     | relation_exp {
                         // $$.code = $1.code;
                         // $$.ret_name = strdup("");
