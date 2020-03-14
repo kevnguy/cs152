@@ -350,7 +350,7 @@ statement:          var ASSIGN expression {
                         }
                         ss << $2.code;
                         string middle = to_string($4);
-                        if ($2.arr) {
+                        if ($2.isArray) {
                             ss << "[]= ";
                         } else {
                             ss << "= ";
@@ -363,7 +363,7 @@ statement:          var ASSIGN expression {
                         ss << ": " << label1 << "\n";
                         ss << statementCode;
                         ss << ": "<< label2 << "\n" << $8.code << $10.code;
-                        if ($8.arr) {
+                        if ($8.isArray) {
                             ss << "[]= ";
                         } else {
                             ss << "[]= ";
@@ -374,10 +374,36 @@ statement:          var ASSIGN expression {
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                     }
-                    | READ vars {}
-                    | WRITE vars {}
-                    | CONTINUE {}
-                    | RETURN expression {};
+                    | READ vars {
+                        string temp = $2.code;
+                        size_t charPos = temp.find("/", 0);
+                        while(charPos != string::npos) {
+                            temp.replace(charPos, 1, "<");
+                            charPos = temp.find("/", charPos);
+                        }
+                        $$.code = strdup(temp.c_str());
+                    }
+                    | WRITE vars {
+                        string temp = $2.code;
+                        size_t charPos = temp.find("/", 0);
+                        while(charPos != string::npos) {
+                            temp.replace(charPos, 1, ">");
+                            charPos = temp.find("/", charPos);
+                        }
+                        $$.code = strdup(temp.c_str());
+                    }
+                    | CONTINUE {
+                        string temp = "continue\n";
+                        $$.code = strdup(temp.c_str());
+                    }
+                    | RETURN expression {
+                        stringstream ss;
+                        ss << $2.code;
+                        ss << "ret ";
+                        ss << $2.ret_name << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                    };
 statements:         statement SEMICOLON statements {
                         stringstream ss;
                         ss << $1.code << $3.code;
