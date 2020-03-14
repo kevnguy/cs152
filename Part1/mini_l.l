@@ -4,43 +4,43 @@
    using namespace std;
    int currLine = 1, currPos = 1, i = 0;
    string temp;
-   unordered_map<string, string> reservedWords = {
-      {"function", "FUNCTION"},
-      {"beginparams", "BEGIN_PARAMS"},
-      {"endparams", "END_PARAMS"},
-      {"beginlocals", "BEGIN_LOCALS"},
-      {"endlocals", "END_LOCALS"},
-      {"beginbody", "BEGIN_BODY"},
-      {"endbody", "END_BODY"},
-      {"integer", "INTEGER"},
-      {"array", "ARRAY"},
-      {"of", "OF"},
-      {"if", "IF"},
-      {"then", "THEN"},
-      {"endif", "ENDIF"},
-      {"else", "ELSE"},
-      {"while", "WHILE"},
-      {"do", "DO"},
-      {"for", "FOR"},
-      {"beginloop", "BEGINLOOP"},
-      {"endloop", "ENDLOOP"},
-      {"continue", "CONTINUE"},
-      {"read", "READ"},
-      {"write", "WRITE"},
-      {"and", "AND"},
-      {"or", "OR"},
-      {"not", "NOT"},
-      {"true", "TRUE"},
-      {"false", "FALSE"},
-      {"return", "RETURN"}
-   };
-   unordered_map<string, string> arithmeticOp = {
-      {"-", "MINUS"},
-      {"+", "PLUS"},
-      {"*", "MULT"},
-      {"/", "DIV"},
-      {"=", "EQUAL"}
-   };
+   // unordered_map<string, string> reservedWords = {
+   //    {"function", "FUNCTION"},
+   //    {"beginparams", "BEGIN_PARAMS"},
+   //    {"endparams", "END_PARAMS"},
+   //    {"beginlocals", "BEGIN_LOCALS"},
+   //    {"endlocals", "END_LOCALS"},
+   //    {"beginbody", "BEGIN_BODY"},
+   //    {"endbody", "END_BODY"},
+   //    {"integer", "INTEGER"},
+   //    {"array", "ARRAY"},
+   //    {"of", "OF"},
+   //    {"if", "IF"},
+   //    {"then", "THEN"},
+   //    {"endif", "ENDIF"},
+   //    {"else", "ELSE"},
+   //    {"while", "WHILE"},
+   //    {"do", "DO"},
+   //    {"for", "FOR"},
+   //    {"beginloop", "BEGINLOOP"},
+   //    {"endloop", "ENDLOOP"},
+   //    {"continue", "CONTINUE"},
+   //    {"read", "READ"},
+   //    {"write", "WRITE"},
+   //    {"and", "AND"},
+   //    {"or", "OR"},
+   //    {"not", "NOT"},
+   //    {"true", "TRUE"},
+   //    {"false", "FALSE"},
+   //    {"return", "RETURN"}
+   // };
+   // unordered_map<string, string> arithmeticOp = {
+   //    {"-", "MINUS"},
+   //    {"+", "PLUS"},
+   //    {"*", "MULT"},
+   //    {"/", "DIV"},
+   //    {"=", "EQUAL"}
+   // };
 %}
 
 DIGIT    [0-9]
@@ -49,6 +49,35 @@ UNDERSCORE [_]
 COMMENT [#]
 
 %%
+"function"     {currPos += yyleng; return FUNCTION;}
+"beginparams"  {currPos += yyleng; return BEGIN_PARAMS;}
+"endparams"    {currPos += yyleng; return END_PARAMS;}
+"beginlocals"  {currPos += yyleng; return BEGIN_LOCALS;}
+"endlocals"    {currPos += yyleng; return END_LOCALS;}
+"beginbody"    {currPos += yyleng; return BEGIN_BODY;}
+"endbody"      {currPos += yyleng; return END_BODY;}
+"integer"      {currPos += yyleng; return INTEGER;}
+"array"        {currPos += yyleng; return ARRAY;}
+"of"           {currPos += yyleng; return OF;}
+"if"           {currPos += yyleng; return IF;}
+"then"         {currPos += yyleng; return THEN;}
+"endif"        {currPos += yyleng; return ENDIF;}
+"else"         {currPos += yyleng; return ELSE;}
+"while"        {currPos += yyleng; return WHILE;}
+"do"           {currPos += yyleng; return DO;}
+"for"          {currPos += yyleng; return FOR;}
+"beginloop"    {currPos += yyleng; return BEGINLOOP;}
+"endloop"      {currPos += yyleng; return ENDLOOP;}
+"continue"     {currPos += yyleng; return CONTINUE;}
+"read"         {currPos += yyleng; return READ;}
+"write"        {currPos += yyleng; return WRITE;}
+"and"          {currPos += yyleng; return AND;}
+"or"           {currPos += yyleng; return OR;}
+"not"          {currPos += yyleng; return NOT;}
+"true"         {currPos += yyleng; return TRUE;}
+"false"        {currPos += yyleng; return FALSE;}
+"return"       {currPos += yyleng; return RETURN;}
+
 "-"            {printf("SUB\n"); currPos += yyleng;}
 "+"            {printf("ADD\n"); currPos += yyleng;}
 "*"            {printf("MULT\n"); currPos += yyleng;}
@@ -74,7 +103,11 @@ COMMENT [#]
 
 {DIGIT}+       {printf("NUMBER %s\n", yytext); currPos += yyleng;}
 
-{LETTER}({LETTER}|{DIGIT})* {
+{LETTER} {
+    printf("IDENT %s\n", yytext);
+}
+
+{LETTER}({LETTER}|{DIGIT}|{UNDERSCORE})*({LETTER}|{DIGIT}) {
    if(reservedWords.find(yytext) == reservedWords.end()) {
       printf("IDENT %s\n", yytext);
    }
