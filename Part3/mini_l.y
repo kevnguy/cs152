@@ -18,6 +18,7 @@
     #include <stdlib.h>
     #include <unordered_set>
     #include <vector>
+    #include <map>
     //#include "y.tab.h"
     using namespace std;
     int yyerror(string s);
@@ -122,7 +123,7 @@ function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_
                             int dotPos = declarationStrings.find(".");
                             declarationStrings.replace(dotPos, 1, "=");
                             string assignStuff = ", $" + to_string(i) + "\n";
-                            declarationStrings.replace(declarationStrings.find("\n", pos), 1, assignStuff);
+                            declarationStrings.replace(declarationStrings.find("\n", dotPos), 1, assignStuff);
                             //delete assignment stuff (. k) instead of replacing. Then append new stuff to ss
                             //ss << "= " << temp.at(i) << ", $" << i << "\n";
                         }
@@ -147,7 +148,7 @@ declaration:        identifiers COLON INTEGER { //done
                         string identStrings = $1.ret_name;
                         //string temp;
 
-                        while(!ex == true) {
+                        while(!exp == true) {
                             rightP = identStrings.find("|", leftP);
                             ss << ". ";
                             //temp.append(". ");
@@ -261,7 +262,7 @@ declarations:       declaration SEMICOLON declarations {
                         stringstream ss;
                         ss << $1.code << $3.code;
 			            string temp = ss.str();
-                        $$.code = strdub(temp.c_str());
+                        $$.code = strdup(temp.c_str());
                         $$.ret_name = "";
                     }
                     | /*epsilon*/ {
@@ -372,9 +373,9 @@ relation_exp:       nots expression comp expression {
                     }
 		            | expression comp expression {
                         stringstream ss;
-                        ss << $2.code;
+                        ss << $1.code;
                         ss << $3.code;
-                        ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
+                        ss << $2.ret_name << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                         $$.ret_name = "";
