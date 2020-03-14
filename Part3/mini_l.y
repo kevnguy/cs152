@@ -146,14 +146,11 @@ declaration:        identifiers COLON INTEGER { //done
                         bool exp = false;
                         int rightP = 0;
                         int leftP = 0;
-                        //different
                         string identStrings = $1.ret_name;
-                        //string temp;
 
                         while(!exp == true) {
                             rightP = identStrings.find("|", leftP);
                             ss << ". ";
-                            //temp.append(". ");
                             if(rightP == string::npos) {
                                 string id = identStrings.substr(leftP, rightP);
                                 if(reservedWords.find(id) != reservedWords.end()) {
@@ -167,22 +164,10 @@ declaration:        identifiers COLON INTEGER { //done
                                     arraySizes[id] = 1;
                                 }
                                 ss << id;
-                                //temp.append(id);
                                 leftP = rightP + 1;
                             }
                             ss << "\n";
-                            //temp.append("\n");
                         }
-                        // $$.code = strdup(temp.c_str());
-                        // $$.ret_name = strdup("");
-
-                        // string id;
-                        // string stringIDs = $1.ret_name;
-                        // stringstream ids(stringIDs);
-                        // while(ids >> id) {
-                        //     ($$.idents).push_back(strdup(id.c_str());
-                        //     ss << ". " << id << "\n";   
-                        // }
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                         $$.ret_name = strdup("");
@@ -242,23 +227,10 @@ declaration:        identifiers COLON INTEGER { //done
                             ss << ", ";
                             ss << $5.ret_name;
                             ss << "\n";
-                            // temp.append(", ");
-                            // temp.append(std::to_string($5));
-                            // temp.append("\n");
                         }
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                         $$.ret_name = strdup("");
-                        
-                        // stringstream ss;
-                        // string hold;
-                        // string temp = $1.code;
-                        // stringstream ids(temp);
-                        // while(ids >> hold) {
-                        //     ss << ".[] " << hold << ", " << $5.ret_name << "\n";
-                        // }
-                        // $$.code = ss.str();
-                        // $$.ret_name = strdup("");
                     };
 declarations:       declaration SEMICOLON declarations {
                         stringstream ss;
@@ -292,10 +264,6 @@ statement:          var ASSIGN expression {
                         ss << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        // stringstream ss;
-                        // ss << $1.code;
-                        // ss << $3.code;
-                        // ss << "= " << $1.ret_name << ", " << $3.ret_name << "\n";
                     }
                     | IF bool_exp THEN statements ENDIF {
                         string label0 = make_label();
@@ -326,25 +294,25 @@ statement:          var ASSIGN expression {
                     }
                     | WHILE bool_exp BEGINLOOP statements ENDLOOP {
                         stringstream ss;
-                        string start = make_label();
-                        string in = make_label();
-                        string after = make_label();
+                        string label0 = make_label();
+                        string label1 = make_label();
+                        string label2 = make_label();
                         string statementCode = $4.code;
                         size_t contPos = statementCode.find("continue");
                         while (contPos != string::npos) {
-                            statementCode.replace(contPos, 8, ":= " + start);
+                            statementCode.replace(contPos, 8, ":= " + label0);
                             contPos = statementCode.find("continue");
                         }
                         ss << ": ";
-                        ss << start << "\n";
+                        ss << label0 << "\n";
                         ss << $2.code;
-                        ss << "?:= " << in << ", ";
+                        ss << "?:= " << label1 << ", ";
                         ss << $2.ret_name << "\n";
-                        ss << ":= " << after << "\n";
-                        ss << ": " << in << "\n";
+                        ss << ":= " << label2 << "\n";
+                        ss << ": " << label1 << "\n";
                         ss << statementCode;
-                        ss << ":= " << start << "\n";
-                        ss << ": " << after << "\n";
+                        ss << ":= " << label0 << "\n";
+                        ss << ": " << label2 << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                     }
@@ -368,7 +336,44 @@ statement:          var ASSIGN expression {
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                     }
-                    | FOR var ASSIGN number SEMICOLON bool_exp SEMICOLON var ASSIGN expression BEGINLOOP statements ENDLOOP {}
+                    | FOR var ASSIGN number SEMICOLON bool_exp SEMICOLON var ASSIGN expression BEGINLOOP statements ENDLOOP {
+                        stringstream ss;
+                        string label0 = make_label();
+                        string label1 = make_label();
+                        string label2 = make_label();
+                        string label3 = make_label();
+                        string statementCode = $12.code;
+                        size_t pos = statementCode.find("continue");
+                        while (pos != string::npos) {
+                            statementCode.replace(pos, 8, ":= "+label2);
+                            pos = statementCode.find("continue");
+                        }
+                        ss << $2.code;
+                        string middle = to_string($4);
+                        if ($2.arr) {
+                            ss << "[]= ";
+                        } else {
+                            ss << "= ";
+                        }
+                        ss << $2.ret_name << ", " << middle << "\n" << ": " << label0 << "\n";
+                        ss << $6.code;
+                        ss << "?:= " << label1 << ", ";
+                        ss << $6.ret_name << "\n";
+                        ss << ":= " << label3 << "\n";
+                        ss << ": " << label1 << "\n";
+                        ss << statementCode;
+                        ss << ": "<< label2 << "\n" << $8.code << $10.code;
+                        if ($8.arr) {
+                            ss << "[]= ";
+                        } else {
+                            ss << "[]= ";
+                        }
+                        ss << $8.ret_name << ", " << $10.ret_name << "\n";
+                        ss << ":= " << label0 << "\n";
+                        ss << ": " << label3 << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                    }
                     | READ vars {}
                     | WRITE vars {}
                     | CONTINUE {}
