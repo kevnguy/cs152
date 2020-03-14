@@ -24,18 +24,28 @@
     int yyerror(char *s);
     int yylex(void);
     extern FILE* yyin;
+    bool existsMain = false;
+    map<string, int> arraySizes;
+    map<string, string> tempVars;
     unordered_set<string> predefFuncs;
+    unordered_set<string> reservedWords {"NUMBER", "IDENT", "RETURN", "FUNCTION", "SEMICOLON", "BEGIN_PARAMS", "END_PARAMS", "BEGIN_LOCALS", "END_LOCALS", "BEGIN_BODY", 
+    "END_BODY", "BEGINLOOP", "ENDLOOP", "COLON", "INTEGER", "COMMA", "ARRAY", "L_SQUARE_BRACKET", "R_SQUARE_BRACKET", "L_PAREN", "R_PAREN", "IF", "ELSE", "THEN", 
+    "CONTINUE", "ENDIF", "OF", "READ", "WRITE", "DO", "WHILE", "FOR", "TRUE", "FALSE", "ASSIGN", "EQ", "NEQ", "LT", "LTE", "GT", "GTE", "ADD", "SUB", "MULT", "DIV", 
+    "MOD", "AND", "OR", "NOT", "prog_start", "functions", "function", "declaration", "declarations", "statement", "statements", "bool_exp", "relation_and_exp",
+    "relation_exp", "nots", "comp", "expression", "multiplicative_expression", "term", "term_num", "vars", "var", "identifiers", "identifier", "number", "expressions"};
 %}
 
 %union {
     int num;
     char* id;
-    struct {
+    struct A {
         char* code;
         char* ret_name;
-        char* var_name;
-        vector<char*> idents;
+        bool isArray;
     } nterm;
+    struct B {
+        char* code;
+    } stmnt;
 }
 
 %start prog_start
@@ -64,8 +74,8 @@
 %type<nterm> function
 %type<nterm> declaration
 %type<nterm> declarations
-%type<nterm> statement
-%type<nterm> statements
+%type<stmnt> statement
+%type<stmnt> statements
 %type<nterm> bool_exp
 %type<nterm> relation_and_exp
 %type<nterm> relation_exp
@@ -83,7 +93,7 @@
 %type<nterm> expressions
 
 %%
-  //Actual output done in prog_start
+
 prog_start:         functions {
                         cout << $1.code;
                     };
@@ -100,21 +110,29 @@ functions:          function functions {
                     };
 function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_PARAMS BEGIN_LOCALS declarations END_LOCALS BEGIN_BODY statements END_BODY{
                         stringstream ss;
-                        vector<string> temp = $5.idents;
+                        string declarationStrings;
                         ss << "func ";
-                        if(predefFuncs.find($2.ret_name) == predefFuncs.end()) {
-                            predefFuncs.insert($2.ret_name);
-                            ss << $2.ret_name << "\n";
+                        string funcID = $2.ret_name;
+                        if(funcID == "main") {
+                            existsMain = true;
                         }
-                        else {
-                            ss << "\nError: function identifier already in use\n";
-                        }
+                        declarationStrings = $5.code;
                         ss << $5.code;
-                        for(int i = 0; i < temp.size(); i++) {
-                            ss << "= " << temp.at(i) << ", $" << i << "\n";
+                        for(int i = 0; declarationStrings.find(".") != string::npos; i++) {
+                            int dotPos = declarationStrings.find(".");
+                            declarationStrings.replace(dotPos, 1, "=");
+                            string assignStuff = ", $" + to_string(i) + "\n";
+                            declarationStrings.replace(declarationStrings.find("\n", pos), 1, assignStuff);
+                            //delete assignment stuff (. k) instead of replacing. Then append new stuff to ss
+                            //ss << "= " << temp.at(i) << ", $" << i << "\n";
                         }
-                        //ss << $8.code;
-                        //ss << $11.code;
+                        ss << declarationStrings;
+                        ss << $8.code;
+                        string statementStrings = $11.code;
+                        if(statementStrings.find("continue") != string::npos) {
+                            cout << "Error: Continue exists outside loop in function " << $2.ret_name << "\n";
+                        }
+                        ss << statementStrings;
                         ss << "endfunc" << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
@@ -122,18 +140,113 @@ function:           FUNCTION identifier SEMICOLON BEGIN_PARAMS declarations END_
                         };
 declaration:        identifiers COLON INTEGER { //done
                         stringstream ss;
-                        string id;
-                        string stringIDs = $1.ret_name;
-                        stringstream ids(stringIDs);
-                        while(ids >> id) {
-                            ($$.idents).push_back(strdup(id.c_str());
-                            ss << ". " << id << "\n";   
+                        bool exp = false;
+                        int rightP = 0;
+                        int leftP = 0;
+                        //different
+                        string identStrings = $1.ret_name;
+                        //string temp;
+
+                        while(!ex == true) {
+                            rightP = identStrings.find("|", leftP);
+                            ss << ". ";
+                            //temp.append(". ");
+                            if(right == string::npos) {
+                                string id = identStrings.substr(leftP, rightP);
+                                if(reservedWords.find(id) != reservedWords.end()) {
+                                    cout << "Identifier " << id << "'s name is reserved." << endl;
+                                }
+                                if(tempVars.find(id) != tempVars.end() || predefFuncs.find(ident) != predefFuncs.end()) {
+                                    cout << "Identifier " << id << " was previously declared." << endl;
+                                }
+                                else {
+                                    tempVars[id] = id;
+                                    arraySizes[id] = 1;
+                                }
+                                ss << id;
+                                //temp.append(id);
+                                leftP = rightP + 1;
+                            }
+                            ss << "\n";
+                            //temp.append("\n");
                         }
+                        // $$.code = strdup(temp.c_str());
+                        // $$.ret_name = "";
+
+                        // string id;
+                        // string stringIDs = $1.ret_name;
+                        // stringstream ids(stringIDs);
+                        // while(ids >> id) {
+                        //     ($$.idents).push_back(strdup(id.c_str());
+                        //     ss << ". " << id << "\n";   
+                        // }
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
                         $$.ret_name = "";
                     }
                     | identifiers COLON ARRAY L_SQUARE_BRACKET number R_SQUARE_BRACKET OF INTEGER { //done
+                        stringstream ss;
+                        size_t leftP = 0;
+                        size_t rightP = 0;
+                        string identStrings = $1.ret_name;
+                        //string temp;
+                        bool exp = false;
+                        while(!exp) {
+                            rightP = identStrings.find("/", left);
+                            ss << ".[] ";
+                            //temp.append(".[] ");
+                            if (rightP == string::npos) {
+                                string id = identStrings.substr(leftP, rightP);
+                                if (reservedWords.find(id) != reservedWords.end()) {
+                                    cout << "Id " << id << "'s name is reserved." << endl;
+                                    //printf("Identifier %s's name is a reserved word.\n", ident.c_str());
+                                }
+                                if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
+                                    cout << "Id " << id << " has previously been declared" << endl;
+                                    // printf("Identifier %s is previously declared.\n", ident.c_str());
+                                } else {
+                                    if ($5 <= 0) {
+                                        cout << "Error: declaring array id " << id << " of size <= 0" << endl;
+                                        // printf("Declaring array ident %s of size <= 0.\n", ident.c_str());
+                                    }
+                                    tempVars[id] = id;
+                                    arraySizes[id] = $5;
+                                }
+                                ss << id;
+                                // temp.append(ident);
+                                exp = true;
+                            } else {
+                                string id = identStrings.substr(leftP, rightP - leftP);
+                                if (reservedWords.find(id) != reservedWords.end()) {
+                                    cout << "Id " << id << "is reserved." << endl;
+                                    // printf("Identifier %s's name is a reserved word.\n", ident.c_str());
+                                }
+                                if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
+                                    cout << "Id " << id << "has been previously declared" << endl;
+                                    // printf("Identifier %s is previously declared.\n", ident.c_str());
+                                } else {
+                                    if ($5 <= 0) {
+                                        cout << "Error: declaring array id " << id << " of size <= 0" << endl;
+                                        // printf("Declaring array ident %s of size <= 0.\n", ident.c_str());
+                                    }
+                                    tempVars[id] = id;
+                                    arraySizes[id] = $5;
+                                }
+                                ss << ident;
+                                // temp.append(ident);
+                                leftP = rightP + 1;
+                            }
+                            ss << ", ";
+                            ss << to_string($5);
+                            ss << "\n";
+                            // temp.append(", ");
+                            // temp.append(std::to_string($5));
+                            // temp.append("\n");
+                        }
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                        $$.ret_name = strdup("");
+                        
                         // stringstream ss;
                         // string hold;
                         // string temp = $1.code;
@@ -146,7 +259,7 @@ declaration:        identifiers COLON INTEGER { //done
                     };
 declarations:       declaration SEMICOLON declarations {
                         stringstream ss;
-                        ss << $1.code << $3.code << "\n";
+                        ss << $1.code << $3.code;
 			            string temp = ss.str();
                         $$.code = strdub(temp.c_str());
                         $$.ret_name = "";
@@ -156,23 +269,44 @@ declarations:       declaration SEMICOLON declarations {
                         $$.ret_name = "";
                     };
 statement:          var ASSIGN expression {
+                        stringstream ss;
+                        ss << $1.code << $3.code;
+                        if($1.isArray && $3.isArray) {
+                            ss << "[]= ";
+                        }
+                        else if($1.arr) {
+                            ss << "[]= ";
+                        }
+                        else if($3.arr) {
+                            ss << "= ";
+                        }
+                        else {
+                            ss << "= ";
+                        }
+                        ss << $1.ret_name;
+                        ss << ", ";
+                        ss << $3.ret_name;
+                        ss << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
                         // stringstream ss;
                         // ss << $1.code;
                         // ss << $3.code;
                         // ss << "= " << $1.ret_name << ", " << $3.ret_name << "\n";
                     }
                     | IF bool_exp THEN statements ENDIF {
-                        // string label0 = make_label();
-                        // string label1 = make_label();
-                        // stringstream ss;
-                        // ss << $2.code;
-                        // ss << "?:= " << label0 << $2.ret_name << "\n";
-                        // ss << ":= " << label1;
-                        // ss << ": " << label0;
-                        // ss << $4.code;
-                        // ss << ": " << label1;
-                        // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        string label0 = make_label();
+                        string label1 = make_label();
+                        stringstream ss;
+                        ss << $2.code;
+                        ss << "?:= " << label0 << $2.ret_name << "\n";
+                        ss << ":= " << label1 << "\n";
+                        ss << ": " << label0 << "\n";
+                        ss << $4.code;
+                        ss << ": " << label1 << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                        $$.ret_name = "";
                     }
                     | IF bool_exp THEN statements ELSE statements ENDIF {
                         // string label0 = make_label();
@@ -197,22 +331,33 @@ statement:          var ASSIGN expression {
                     | WRITE vars {}
                     | CONTINUE {}
                     | RETURN expression {};
-statements:         statement SEMICOLON statements {}
-                    | /*epsilon*/ {};
+statements:         statement SEMICOLON statements {
+                        stringstream ss;
+                        ss << $1.code << $3.code;
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                    }
+                    | /*epsilon*/ {
+                        $$.code = "";
+                        $$.ret_name = "";
+                    };
 bool_exp:           relation_and_exp OR relation_and_exp {}
-                    | relation_and_exp {};
+                    | relation_and_exp {
+
+                    };
 relation_and_exp:   relation_exp AND relation_exp {}
                     | relation_exp {
                         // $$.code = $1.code;
                         // $$.ret_name = "";
                     };
 relation_exp:       nots expression comp expression {
-                        // stringstream ss;
-                        // ss << $2.code;
-                        // ss << $4.code;
-                        // ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
-                        // $$.code = ss.str();
-                        // $$.ret_name = "";
+                        stringstream ss;
+                        ss << $2.code;
+                        ss << $4.code;
+                        ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                        $$.ret_name = "";
                     }
                     | nots TRUE {
                         // $$.code = "";
@@ -224,9 +369,15 @@ relation_exp:       nots expression comp expression {
                     }
                     | nots L_PAREN bool_exp R_PAREN {
 
-                   }
-		    | expression comp expression{
-
+                    }
+		            | expression comp expression {
+                        stringstream ss;
+                        ss << $2.code;
+                        ss << $4.code;
+                        ss << $3.ret_name << ", " << $2.ret_name << ", " << $4.ret_name << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                        $$.ret_name = "";
                     }
                     | TRUE {
 
@@ -235,7 +386,7 @@ relation_exp:       nots expression comp expression {
 
                     }
                     | L_PAREN bool_exp R_PAREN{
-
+                        //stuff
                     };
 nots:               NOT {
                         // string temp_var = make_temp();
@@ -245,28 +396,28 @@ nots:               NOT {
                         // $$.ret_name = "! ";
                     };
 comp:               EQ {
-                        // $$.ret_name = "== ";
-                        // $$.code = "";
+                        $$.ret_name = "== ";
+                        $$.code = "";
                     }
                     | NEQ {
-                        // $$.ret_name = "!= ";
-                        // $$.code = "";
+                        $$.ret_name = "!= ";
+                        $$.code = "";
                     }
                     | LT {
-                        // $$.ret_name = "< ";
-                        // $$.code = "";
+                        $$.ret_name = "< ";
+                        $$.code = "";
                     }
                     | GT {
-                        // $$.ret_name = "> ";
-                        // $$.code = "";
+                        $$.ret_name = "> ";
+                        $$.code = "";
                     }
                     | LTE {
-                        // $$.ret_name = "<= ";
-                        // $$.code = "";
+                        $$.ret_name = "<= ";
+                        $$.code = "";
                     }
                     | GTE {
-                        // $$.ret_name = ">= ";
-                        // $$.code = "";
+                        $$.ret_name = ">= ";
+                        $$.code = "";
                     };
 expression:         multiplicative_expression {
                         // $$.code = $1.code;
@@ -357,9 +508,10 @@ var:                identifier L_SQUARE_BRACKET expression R_SQUARE_BRACKET {
                     };
 identifiers:        identifier COMMA identifiers { //done
                         stringstream ss;
-                        ss << $1.ret_name << " " << $3.code;
-                        $$.code = ss;
-                        $$.ret_name = "";
+                        ss << $1.ret_name << "/" << $3.code;
+                        string temp = ss.str();
+                        $$.ret_name = strdup(temp.c_str());
+                        $$.code = "";
                     }
                     | identifier { //done
                         $$.code = "";
@@ -367,7 +519,7 @@ identifiers:        identifier COMMA identifiers { //done
                     };
 identifier:         IDENT { //done
                         $$.code = "";
-                        $$.ret_name = $1;
+                        $$.ret_name = strdup($1);
                     };
 number:             NUMBER {
                         // $$.ret_name = to_string($1);
