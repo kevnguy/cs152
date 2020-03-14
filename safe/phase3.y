@@ -18,7 +18,7 @@
     extern int currPos;
     map<string, string> tempVars;
     map<string, int> arrSize;
-    bool mainFunc = false;
+    bool existsMain = false;
     set<string> predefFuncs;
     set<string> reservedWords {"NUMBER", "IDENT", "RETURN", "FUNCTION", "SEMICOLON", "BEGIN_PARAMS", "END_PARAMS", "BEGIN_LOCALS", "END_LOCALS", "BEGIN_BODY",
         "CONTINUE", "ENDIF", "OF", "READ", "WRITE", "DO", "WHILE", "FOR", "TRUE", "FALSE", "ASSIGN", "EQ", "NEQ", "LT", "LTE", "GT", "GTE", "ADD", "SUB", "MULT", "DIV",
@@ -38,13 +38,13 @@
   int		num;
   char*	    ident;
 
-  struct E {
+  struct A {
       bool  is_arr;
       char* ret_name;
       char* code;
   } expression;
 
-  struct S {
+  struct B {
       char* code;
   } statement;
 }
@@ -68,7 +68,7 @@
 
 %%
 program:	%empty	{
-                if (!mainFunc) {
+                if (!existsMain) {
                     cout << "Missing main function declaration" << endl;
                 }
             }
@@ -79,7 +79,7 @@ function:   FUNCTION func_ident SEMICOLON BEGIN_PARAMS declarations END_PARAMS B
                 ss << "func " << $2.ret_name << "\n";
                 string s = $2.ret_name;
                 if (s == "main") {
-                    mainFunc = true;
+                    existsMain = true;
                 }
                 ss << $5.code;
                 string decs = $5.code;
@@ -95,7 +95,6 @@ function:   FUNCTION func_ident SEMICOLON BEGIN_PARAMS declarations END_PARAMS B
                 string statements = $11.code;
                 if (statements.find("continue") != string::npos) {
                     cout << "ERROR: Continue is outside loop in function " << $2.ret_name << endl;
-                    //printf("ERROR: Continue is outside loop in function %s\n", $2.ret_name);
                 }
                 ss << statements << "endfunc\n\n";
                 string temp = ss.str();
@@ -119,21 +118,17 @@ declaration:    idents COLON INTEGER {
                     int left = 0;
                     int right = 0;
                     string parse($1.ret_name);
-                    //string temp;
                     bool ex = false;
                     while(!ex) {
-                        right = parse.find("|", left);
+                        right = parse.find("/", left);
                         ss << ". ";
-                        //temp.append(". ");
                         if (right == string::npos) {
                             string ident = parse.substr(left, right);
                             if (reservedWords.find(ident) != reservedWords.end()) {
                                 cout << "Identifier " << ident.c_str() << " is a reserved word." << endl;
-                                //printf("Identifier %s is a reservedWords word.\n", ident.c_str());
                             }
                             if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
                                 cout << "Identifier " << ident.c_str() << " was previously declared" << endl;
-                                //printf("Identifier %s was previously declared.\n", ident.c_str());
                             } else {
                                 tempVars[ident] = ident;
                                 arrSize[ident] = 1;
@@ -145,11 +140,9 @@ declaration:    idents COLON INTEGER {
                             string ident = parse.substr(left, right-left);
                             if (reservedWords.find(ident) != reservedWords.end()) {
                                 cout << "Identifier " << ident.c_str() << " is a reserved word." << endl;
-                                //printf("Identifier %s is a reservedWords word.\n", ident.c_str());
                             }
                             if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
                                 cout << "Identifier " << ident.c_str() << " was previously declared." << endl;
-                                //printf("Identifier %s was previously declared.\n", ident.c_str());
                             } else {
                                 tempVars[ident] = ident;
                                 arrSize[ident] = 1;
@@ -159,7 +152,6 @@ declaration:    idents COLON INTEGER {
                             left = right + 1;
                         }
                         ss << "\n";
-                        //temp.append("\n");
                     }
                     string temp = ss.str();
                     $$.code = strdup(temp.c_str());
@@ -167,60 +159,47 @@ declaration:    idents COLON INTEGER {
                 }
     | idents COLON ARRAY L_SQUARE_BRACKET NUMBER R_SQUARE_BRACKET OF INTEGER  {
             stringstream ss;
-            //string temp;
             size_t left = 0;
             size_t right = 0;
             string parse($1.ret_name);
             bool ex = false;
             while(!ex) {
-                right = parse.find("|", left);
+                right = parse.find("/", left);
                 ss << ".[] ";
-                //temp.append(".[] ");
                 if (right == string::npos) {
                     string ident = parse.substr(left, right);
                     if (reservedWords.find(ident) != reservedWords.end()) {
                         cout << "Identifier name" << ident.c_str() << " is a reserved word." << endl;
-                        //printf("Identifier %s's name is a reserved word.\n", ident.c_str());
                     }
                     if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
                         cout << "Identifier " << ident.c_str() << " was previously declared" << endl;
-                        //printf("Identifier %s is previously declared.\n", ident.c_str());
                     } else {
                         if ($5 <= 0) {
                             cout << "Declaring and array ident " << ident.c_str() << " of size less than or equal to 0." << endl;
-                            //printf("Declaring array ident %s of size less than or equal to 0.\n", ident.c_str());
                         }
                         tempVars[ident] = ident;
                         arrSize[ident] = $5;
                     }
                     ss << ident;
-                    //temp.append(ident);
                     ex = true;
                 } else {
                     string ident = parse.substr(left, right-left);
                     if (reservedWords.find(ident) != reservedWords.end()) {
                         cout << "Identifier " << ident.c_str() << " shares a name with a reserved word" << endl;
-                        //printf("Identifier %s's name is a reservedWords word.\n", ident.c_str());
                     }
                     if (predefFuncs.find(ident) != predefFuncs.end() || tempVars.find(ident) != tempVars.end()) {
                         cout << "Identifier " << ident.c_str() << " was previously declared" << endl;
-                        //printf("Identifier %s is previously declared.\n", ident.c_str());
                     } else {
                         if ($5 <= 0) {
                             cout << "Declaring array ident " << ident.c_str() << " of size less than or equal to 0" << endl;
-                            //printf("Declaring array ident %s of size <= 0.\n", ident.c_str());
                         }
                         tempVars[ident] = ident;
                         arrSize[ident] = $5;
                     }
                     ss << ident;
-                    //temp.append(ident);
                     left = right + 1;
                 }
                 ss << ", " << to_string($5) << "\n";
-                //temp.append(", ");
-                //temp.append(to_string($5));
-                //temp.append("\n");
             }
             string temp = ss.str();
             $$.code = strdup(temp.c_str());
@@ -230,7 +209,6 @@ declaration:    idents COLON INTEGER {
 func_ident:	IDENT {
                 if (predefFuncs.find($1) != predefFuncs.end()) {
                     cout << "function name " << $1 << " already declared." << endl;
-                    //printf("function name %s already declared.\n", $1);
                 } else {
                     predefFuncs.insert($1);
                 }
@@ -249,12 +227,8 @@ idents:     ident {
             }
             | ident COMMA idents  {
                 stringstream ss;
-                ss << $1.ret_name << "|" << $3.ret_name;
+                ss << $1.ret_name << "/" << $3.ret_name;
                 string temp = ss.str();
-                //string temp;
-                //temp.append($1.ret_name);
-                //temp.append("|");
-                //temp.append($3.ret_name);
                 $$.ret_name = strdup(temp.c_str());
                 $$.code = strdup("");
             };
@@ -263,8 +237,6 @@ statements: statement SEMICOLON statements {
                 stringstream ss;
                 ss << $1.code << $3.code;
                 string temp = ss.str();
-                //temp.append($1.code);
-                //temp.append($3.code);
                 $$.code = strdup(temp.c_str());
                 //no need to set ret_name
             }
@@ -276,10 +248,7 @@ statements: statement SEMICOLON statements {
 statement:  var ASSIGN expression {
                 stringstream ss;
                 ss << $1.code << $3.code;
-                //string temp;
-                //temp.append($1.code);
-                //temp.append($3.code);
-                string mid = $3.ret_name;
+                string expr = $3.ret_name;
                 if ($1.is_arr && $3.is_arr) {
                     ss << "[]= ";
                 } else if ($1.is_arr) {
@@ -289,202 +258,134 @@ statement:  var ASSIGN expression {
                 } else {
                     ss << "= ";
                 }
-                ss << $1.ret_name << ", " << mid << "\n";
-                //temp.append($1.ret_name);
-                //temp.append(", ");
-                //temp.append(mid);
-                //temp += "\n";
+                ss << $1.ret_name << ", " << expr << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
             }
             | IF bool-expr THEN statements ENDIF {
                 stringstream ss;
-                string ifS = make_label();
-                string after = make_label();
-                //string temp;
+                string label0 = make_label();
+                string label1 = make_label();
                 ss << $2.code;
-                //temp.append($2.code);
-                ss << "?:= " << ifS << ", " << $2.ret_name << "\n";
-                ss << ":= " << after << "\n";
-                ss << ": " << ifS << "\n";
+                ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
+                ss << ":= " << label1 << "\n";
+                ss << ": " << label0 << "\n";
                 ss << $4.code;
-                ss << ": " << after << "\n";
-                //temp = temp + "?:= " + ifS + ", " + $2.ret_name + "\n"; //If true, jump to :ifS and do code from $4
-                //temp = temp + ":= " + after + "\n"; //Reached if above not true, skips $4 code by jumping to l2
-                //temp = temp + ": " + ifS + "\n";
-                //temp.append($4.code);
-                //temp = temp + ": " + after + "\n";
+                ss << ": " << label1 << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
             }
             | IF bool-expr THEN statements ELSE statements ENDIF {
                 stringstream ss;
-                //string temp;
-                string ifS = make_label();
-                string after = make_label();
+                string label0 = make_label();
+                string label1 = make_label();
                 ss << $2.code;
-                //temp.append($2.code);
-                ss << "?:= " << ifS << ", " << $2.ret_name << "\n";
+                ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
                 ss << $6.code;
-                ss << ":= " << after << "\n ";
-                ss << ": " << ifS << "\n";
+                ss << ":= " << label1 << "\n ";
+                ss << ": " << label0 << "\n";
                 ss << $4.code;
-                ss << ": " << after << "\n";
-                //temp = temp + "?:= " + ifS + ", " + $2.ret_name + "\n"; //If true, jump to :ifS and do code from $4
-                //temp.append($6.code); //Reached is above not true, does $5 code
-                //temp = temp + ":= " + after + "\n"; //Prevents else code from running if's code
-                //temp = temp + ": " + ifS + "\n";
-                //temp.append($4.code); //Reached by :ifS jump, if's code
-                //temp = temp + ": " + after + "\n";
+                ss << ": " << label1 << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
             }
             | WHILE bool-expr BEGINLOOP statements ENDLOOP {
                 stringstream ss;
-                //string temp;
-                string begin = make_label();
-                string inner = make_label();
-                string after = make_label();
+                string label0 = make_label();
+                string label1 = make_label();
+                string label2 = make_label();
                 string code = $4.code;
                 size_t pos = code.find("continue");
                 while (pos != string::npos) {
-                    code.replace(pos, 8, ":= "+begin);
+                    code.replace(pos, 8, ":= "+label0);
                     pos = code.find("continue");
                 }
-                ss << ": " << begin << "\n";
+                ss << ": " << label0 << "\n";
                 ss << $2.code;
-                ss << "?:= " << inner << ", ";
+                ss << "?:= " << label1 << ", ";
                 ss << $2.ret_name << "\n";
-                ss << ":= " << after << "\n";
-                ss << ": " << inner << "\n";
+                ss << ":= " << label2 << "\n";
+                ss << ": " << label1 << "\n";
                 ss << code;
-                ss << ":= " << begin << "\n";
-                ss << ": " << after << "\n";
-
-                //temp.append(": ");
-                //temp += begin + "\n"; //Defines start of while loop
-                //temp.append($2.code);
-                //temp += "?:= " + inner + ", "; //If true, jumps to code
-                //temp.append($2.ret_name);
-                //temp.append("\n");
-                //temp += ":= " + after + "\n"; //If reached, jumps past while loop
-                //temp += ": " + inner + "\n"; //Marks start of code
-                //temp.append(code);
-                //temp += ":= " + begin + "\n"; //Reached by completing code, returns to start of while loop
-                //temp += ": " + after + "\n"; //Marks end of while loop
+                ss << ":= " << label0 << "\n";
+                ss << ": " << label2 << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
             }
     | DO BEGINLOOP statements ENDLOOP WHILE bool-expr {
         stringstream ss;
-        //string temp;
-        string begin = make_label();
-        string condition = make_label();
-        string code = $3.code;
-        size_t pos = code.find("continue");
+        string label0 = make_label();
+        string label1 = make_label();
+        string statCode = $3.code;
+        size_t pos = statCode.find("continue");
         while (pos != string::npos) {
-            code.replace(pos, 8, ":= "+condition);
-            pos = code.find("continue");
+            statCode.replace(pos, 8, ":= "+label1);
+            pos = statCode.find("continue");
         }
-        ss << ": " << begin << "\n" << code;
-        ss << ": " << condition << "\n";
+        ss << ": " << label0 << "\n" << statCode;
+        ss << ": " << label1 << "\n";
         ss << $6.code;
-        ss << "?:= " << begin << ", ";
+        ss << "?:= " << label0 << ", ";
         ss << $6.ret_name << "\n";
-        //temp.append(": ");
-        //temp += begin + "\n";
-        //temp.append(code);
-        //temp += ": " + condition + "\n";
-        //temp.append($6.code);
-        //temp += "?:= " + begin + ", ";
-        //temp.append($6.ret_name);
-        //temp.append("\n");
         string temp = ss.str();
         $$.code = strdup(temp.c_str());
     }
     | FOR var ASSIGN NUMBER SEMICOLON bool-expr SEMICOLON var ASSIGN expression BEGINLOOP statements ENDLOOP {
         stringstream ss;
-        //string temp;
-        string dst = make_temp();
-        string condition = make_label();
-        string inner = make_label();
-        string increment = make_label();
-        string after = make_label();
-        string code = $12.code;
-        size_t pos = code.find("continue");
+        string temp0 = make_temp();
+        string label0 = make_label();
+        string label1 = make_label();
+        string label2 = make_label();
+        string label3 = make_label();
+        string statCode = $12.code;
+        size_t pos = statCode.find("continue");
         while (pos != string::npos) {
-            code.replace(pos, 8, ":= "+increment);
-            pos = code.find("continue");
+            statCode.replace(pos, 8, ":= "+label2);
+            pos = statCode.find("continue");
         }
         ss << $2.code;
-        //temp.append($2.code);
         string middle = to_string($4);
         if ($2.is_arr) {
             ss << "[]= ";
-            //temp += "[]= ";
         } else {
             ss << "= ";
-            //temp += "= ";
         }
-        ss << $2.ret_name << ", " << middle << "\n" << ": " << condition << "\n";
+        ss << $2.ret_name << ", " << middle << "\n" << ": " << label0 << "\n";
         ss << $6.code;
-        ss << "?:= " << inner << ", ";
+        ss << "?:= " << label1 << ", ";
         ss << $6.ret_name << "\n";
-        ss << ":= " << after << "\n";
-        ss << ": " << inner << "\n";
-        ss << code;
-        ss << ": "<< increment << "\n" << $8.code << $10.code;
-        //temp.append($2.ret_name);
-        //temp.append(", ");
-        //temp.append(middle);
-        //temp += "\n";
-        //temp += ": " + condition + "\n";
-        //temp.append($6.code);
-        //temp += "?:= " + inner + ", "; //If true, jumps to code
-        //temp.append($6.ret_name);
-        //temp.append("\n");
-        //temp += ":= " + after + "\n"; //If reached, jumps past increment and code
-        //temp += ": " + inner + "\n"; //Marks start of code
-        //temp.append(code);
-        //temp += ": " + increment + "\n";
-        //temp.append($8.code);
-        //temp.append($10.code);
+        ss << ":= " << label3 << "\n";
+        ss << ": " << label1 << "\n";
+        ss << statCode;
+        ss << ": "<< label2 << "\n" << $8.code << $10.code;
         if ($8.is_arr) {
             ss << "[]= ";
-            //temp += "[]= ";
         } else {
             ss << "[]= ";
-            //temp += "= ";
         }
         ss << $8.ret_name << ", " << $10.ret_name << "\n";
-        ss << ":= " << condition << "\n";
-        ss << ": " << after << "\n";
-        //temp.append($8.ret_name);
-        //temp.append(", ");
-        //temp.append($10.ret_name);
-        //temp += "\n";
-        //temp += ":= " + condition + "\n";
-        //temp += ": " + after + "\n";
+        ss << ":= " << label0 << "\n";
+        ss << ": " << label3 << "\n";
         string temp = ss.str();
         $$.code = strdup(temp.c_str());
     }
     | READ vars {
         string temp;
         temp.append($2.code);
-        size_t pos = temp.find("|", 0);
+        size_t pos = temp.find("/", 0);
         while(pos != string::npos) {
             temp.replace(pos, 1, "<");
-            pos = temp.find("|", pos);
+            pos = temp.find("/", pos);
         }
         $$.code = strdup(temp.c_str());
     }
     | WRITE vars {
         string temp;
         temp.append($2.code);
-        size_t pos = temp.find("|", 0);
+        size_t pos = temp.find("/", 0);
         while(pos != string::npos) {
             temp.replace(pos, 1, ">");
-            pos = temp.find("|", pos);
+            pos = temp.find("/", pos);
         }
         $$.code = strdup(temp.c_str());
     }
@@ -494,34 +395,20 @@ statement:  var ASSIGN expression {
     | RETURN expression {
         stringstream ss;
         ss << $2.code << "ret " << $2.ret_name << "\n";
-        //string temp;
-        //temp.append($2.code);
-        //temp.append("ret ");
-        //temp.append($2.ret_name);
-        //temp.append("\n");
         string temp = ss.str();
         $$.code = strdup(temp.c_str());
     };
 
 bool-expr:  relation-and-expr OR bool-expr {
         stringstream ss;
-        //string temp;
-        string dst = make_temp();
+        string temp0 = make_temp();
         ss << $1.code << $3.code;
-        ss << ". " << dst << "\n";
-        ss << "|| "<< dst << ", ";
+        ss << ". " << temp0 << "\n";
+        ss << "|| "<< temp0 << ", ";
         ss << $1.ret_name << ", " << $3.ret_name << "\n";
-        //temp.append($1.code);
-        //temp.append($3.code);
-        //temp += ". " + dst + "\n";
-        //temp += "|| " + dst + ", ";
-        //temp.append($1.ret_name);
-        //temp.append(", ");
-        //temp.append($3.ret_name);
-        //temp.append("\n");
         string temp = ss.str();
         $$.code = strdup(temp.c_str());
-        $$.ret_name = strdup(dst.c_str());
+        $$.ret_name = strdup(temp0.c_str());
     }
     | relation-and-expr {
         $$.code = strdup($1.code);
@@ -530,23 +417,14 @@ bool-expr:  relation-and-expr OR bool-expr {
 
 relation-and-expr: relation-expr-inv AND relation-and-expr {
         stringstream ss;
-        //string temp;
-        string dst = make_temp();
+        string temp0 = make_temp();
         ss << $1.code << $3.code;
-        ss << ". " << dst << "\n";
-        ss << "&& " << dst << ", ";
+        ss << ". " << temp0 << "\n";
+        ss << "&& " << temp0 << ", ";
         ss << $1.ret_name << ", " << "$3.ret_name" << "\n";
-        //temp.append($1.code);
-        //temp.append($3.code);
-        //temp += ". " + dst + "\n";
-        //temp += "&& " + dst + ", ";
-        //temp.append($1.ret_name);
-        //temp.append(", ");
-        //temp.append($3.ret_name);
-        //temp.append("\n");
         string temp = ss.str();
         $$.code = strdup(temp.c_str());
-        $$.ret_name = strdup(dst.c_str());
+        $$.ret_name = strdup(temp0.c_str());
     }
     | relation-expr-inv {
         $$.code = strdup($1.code);
@@ -555,20 +433,14 @@ relation-and-expr: relation-expr-inv AND relation-and-expr {
 
 relation-expr-inv:  NOT relation-expr-inv {
         stringstream ss;
-        //string temp;
-        string dst = make_temp();
+        string temp0 = make_temp();
         ss << $2.code;
-        ss << ". " << dst << "\n";
-        ss << "! " <<dst << ", ";
+        ss << ". " << temp0 << "\n";
+        ss << "! " <<temp0 << ", ";
         ss << $2.ret_name << "\n";
-        //temp.append($2.code);
-        //temp += ". " + dst + "\n";
-        //temp += "! " + dst + ", ";
-        //temp.append($2.ret_name);
-        //temp.append("\n");
         string temp = ss.str();
         $$.code = strdup(temp.c_str());
-        $$.ret_name = strdup(dst.c_str());
+        $$.ret_name = strdup(temp0.c_str());
     }
     | relation-expr {
         $$.code = strdup($1.code);
@@ -577,16 +449,12 @@ relation-expr-inv:  NOT relation-expr-inv {
 
 relation-expr:  expression comp expression {
         stringstream ss;
-        string dst = make_temp();
-        //string temp;
+        string temp0 = make_temp();
         ss << $1.code << $3.code;
-        ss << ". " << dst << "\n" << $2.ret_name << dst << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
-        //temp.append($1.code);
-        //temp.append($3.code);
-        //temp = temp + ". " + dst + "\n" + $2.ret_name + dst + ", " + $1.ret_name + ", " + $3.ret_name + "\n";
+        ss << ". " << temp0 << "\n" << $2.ret_name << temp0 << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
         string temp = ss.str();
         $$.code = strdup(temp.c_str());
-        $$.ret_name = strdup(dst.c_str());
+        $$.ret_name = strdup(temp0.c_str());
     }
     | TRUE {
         string temp;
@@ -632,44 +500,25 @@ comp:   EQ {
 
 expression: multiplicative-expr ADD expression {
                 stringstream ss;
-                //string temp;
-                string dst = make_temp();
+                string temp0 = make_temp();
                 ss << $1.code << $3.code;
-                ss << ". " << dst << "\n";
-                ss << "+ " << dst << ", ";
+                ss << ". " << temp0 << "\n";
+                ss << "+ " << temp0 << ", ";
                 ss << $1.ret_name << ", " << $3.ret_name << "\n";
-
-                //temp.append($1.code);
-                //temp.append($3.code);
-                //temp += ". " + dst + "\n";
-                //temp += "+ " + dst + ", ";
-                //temp.append($1.ret_name);
-                //temp += ", ";
-                //temp.append($3.ret_name);
-                //temp += "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
-                $$.ret_name = strdup(dst.c_str());
+                $$.ret_name = strdup(temp0.c_str());
             }
             | multiplicative-expr SUB expression {
                 stringstream ss;
-                //string temp;
-                string dst = make_temp();
+                string temp0 = make_temp();
                 ss << $1.code << $3.code;
-                ss << ". " << dst << "\n";
-                ss << "- " << dst << ", ";
+                ss << ". " << temp0 << "\n";
+                ss << "- " << temp0 << ", ";
                 ss << $1.ret_name << ", " << $3.ret_name << "\n";
-                //temp.append($1.code);
-                //temp.append($3.code);
-                //temp += ". " + dst + "\n";
-                //temp += "- " + dst + ", ";
-                //temp.append($1.ret_name);
-                //temp += ", ";
-                //temp.append($3.ret_name);
-                //temp += "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
-                $$.ret_name = strdup(dst.c_str());
+                $$.ret_name = strdup(temp0.c_str());
             }
             | multiplicative-expr {
                 $$.code = strdup($1.code);
@@ -677,179 +526,99 @@ expression: multiplicative-expr ADD expression {
             };
 
 multiplicative-expr: term MULT multiplicative-expr {
-            stringstream ss;
-            //string temp;
-            string dst = make_temp();
-            ss << $1.code << $3.code << ". " << dst << "\n";
-            ss << "* " << dst << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
-            //temp.append($1.code);
-            //temp.append($3.code);
-            //temp.append(". ");
-            //temp.append(dst);
-            //temp.append("\n");
-            //temp += "* " + dst + ", ";
-            //temp.append($1.ret_name);
-            //temp += ", ";
-            //temp.append($3.ret_name);
-            //temp += "\n";
-            string temp = ss.str();
-            $$.code = strdup(temp.c_str());
-            $$.ret_name = strdup(dst.c_str());
-        }
-        | term DIV multiplicative-expr {
-            stringstream ss;
-            //string temp;
-            string dst = make_temp();
-            ss << $1.code << $3.code << ". " << dst << "\n";
-            ss << "/ " << dst << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
-            //temp.append($1.code);
-            //temp.append($3.code);
-            //temp.append(". ");
-            //temp.append(dst);
-            //temp.append("\n");
-            //temp += "/ " + dst + ", ";
-            //temp.append($1.ret_name);
-            //temp += ", ";
-            //temp.append($3.ret_name);
-            //temp += "\n";
-            string temp = ss.str();
-            $$.code = strdup(temp.c_str());
-            $$.ret_name = strdup(dst.c_str());
-        }
-        | term MOD multiplicative-expr {
-            stringstream ss;
-            //string temp;
-            string dst = make_temp();
-            ss << $1.code << $3.code << ". " << dst << "\n";
-            ss << "% t" << dst << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
-            //temp.append($1.code);
-            //temp.append($3.code);
-            //temp.append(". ");
-            //temp.append(dst);
-            //temp.append("\n");
-            //temp += "% t" + dst + ", ";
-            //temp.append($1.ret_name);
-            //temp += ", ";
-            //temp.append($3.ret_name);
-            //temp += "\n";
-            string temp = ss.str();
-            $$.code = strdup(temp.c_str());
-            $$.ret_name = strdup(dst.c_str());
-        }
-        | term {
-            $$.code = strdup($1.code);
-            $$.ret_name = strdup($1.ret_name);
-        };
+                stringstream ss;
+                string temp0 = make_temp();
+                ss << $1.code << $3.code << ". " << temp0 << "\n";
+                ss << "* " << temp0 << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
+                string temp = ss.str();
+                $$.code = strdup(temp.c_str());
+                $$.ret_name = strdup(temp0.c_str());
+            }
+            | term DIV multiplicative-expr {
+                stringstream ss;
+                string temp0 = make_temp();
+                ss << $1.code << $3.code << ". " << temp0 << "\n";
+                ss << "/ " << temp0 << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
+                string temp = ss.str();
+                $$.code = strdup(temp.c_str());
+                $$.ret_name = strdup(temp0.c_str());
+            }
+            | term MOD multiplicative-expr {
+                stringstream ss;
+                string temp0 = make_temp();
+                ss << $1.code << $3.code << ". " << temp0 << "\n";
+                ss << "% t" << temp0 << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
+                string temp = ss.str();
+                $$.code = strdup(temp.c_str());
+                $$.ret_name = strdup(temp0.c_str());
+            }
+            | term {
+                $$.code = strdup($1.code);
+                $$.ret_name = strdup($1.ret_name);
+            };
 
 term:       SUB var {
                 stringstream ss;
-                string dst = make_temp();
+                string temp0 = make_temp();
                 //string temp;
                 if ($2.is_arr) {
-                    ss << $2.code << ". " << dst << "\n";
-                    ss << "=[] " << dst << ", " << $2.ret_name << "\n";
-                    //temp.append($2.code);
-                    //temp.append(". ");
-                    //temp.append(dst);
-                    //temp.append("\n");
-                    //temp += "=[] " + dst + ", ";
-                    //temp.append($2.ret_name);
-                    //temp.append("\n");
+                    ss << $2.code << ". " << temp0 << "\n";
+                    ss << "=[] " << temp0 << ", " << $2.ret_name << "\n";
                 } else {
-                    ss << ". " << dst << "\n";
-                    ss << "= " << dst << ", " << $2.ret_name << "\n";
+                    ss << ". " << temp0 << "\n";
+                    ss << "= " << temp0 << ", " << $2.ret_name << "\n";
                     ss << $2.code;
-                    //temp.append(". ");
-                    //temp.append(dst);
-                    //temp.append("\n");
-                    //temp = temp + "= " + dst + ", ";
-                    //temp.append($2.ret_name);
-                    //temp.append("\n");
-                    //temp.append($2.code);
                 }
                 if (tempVars.find($2.ret_name) != tempVars.end()) {
-                    tempVars[$2.ret_name] = dst;
+                    tempVars[$2.ret_name] = temp0;
                 }
-                ss << "* " << dst << ", " << dst << "-1\n";
-                //temp += "* " + dst + ", " + dst + ", -1\n";
+                ss << "* " << temp0 << ", " << temp0 << "-1\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
-                $$.ret_name = strdup(dst.c_str());
+                $$.ret_name = strdup(temp0.c_str());
             }
             | SUB NUMBER {
                 stringstream ss;
-                string dst = make_temp();
-                //string temp;
-                ss << ". " << dst << "\n";
-                ss << "= " << dst << ", -" << to_string($2) << "\n";
-                //temp.append(". ");
-                //temp.append(dst);
-                //temp.append("\n");
-                //temp = temp + "= " + dst + ", -" + to_string($2) + "\n";
+                string temp0 = make_temp();
+                ss << ". " << temp0 << "\n";
+                ss << "= " << temp0 << ", -" << to_string($2) << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
-                $$.ret_name = strdup(dst.c_str());
+                $$.ret_name = strdup(temp0.c_str());
             }
             | SUB L_PAREN expression R_PAREN {
                 stringstream ss;
-                //string temp;
                 ss << $3.code << "* " << $3.ret_name << ", -1\n";
-                //temp.append($3.code);
-                //temp.append("* ");
-                //temp.append($3.ret_name);
-                //temp.append(", ");
-                //temp.append($3.ret_name);
-                //temp.append(", -1\n");
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
                 $$.ret_name = strdup($3.ret_name);
             }
             | var {
                 stringstream ss;
-                string dst = make_temp();
-                //string temp;
+                string temp0 = make_temp();
                 if ($1.is_arr) {
-                    ss << $1.code << ". " << dst << "\n";
-                    ss << "=[] " << dst << ", " << $1.ret_name << "\n";
-                    //temp.append($1.code);
-                    //temp.append(". ");
-                    //temp.append(dst);
-                    //temp.append("\n");
-                    //temp += "=[] " + dst + ", ";
-                    //temp.append($1.ret_name);
-                    //temp.append("\n");
+                    ss << $1.code << ". " << temp0 << "\n";
+                    ss << "=[] " << temp0 << ", " << $1.ret_name << "\n";
                 } else {
-                    ss << ". " << dst << "\n";
-                    ss << "= " << dst << ", " << $1.ret_name << "\n";
+                    ss << ". " << temp0 << "\n";
+                    ss << "= " << temp0 << ", " << $1.ret_name << "\n";
                     ss << $1.code;
-                    //temp.append(". ");
-                    //temp.append(dst);
-                    //temp.append("\n");
-                    //temp = temp + "= " + dst + ", ";
-                    //temp.append($1.ret_name);
-                    //temp.append("\n");
-                    //temp.append($1.code);
                 }
                 if (tempVars.find($1.ret_name) != tempVars.end()) {
-                    tempVars[$1.ret_name] = dst;
+                    tempVars[$1.ret_name] = temp0;
                 }
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
-                $$.ret_name = strdup(dst.c_str());
+                $$.ret_name = strdup(temp0.c_str());
             }
             | NUMBER {
                 stringstream ss;
-                string dst = make_temp();
-                //string temp;
-                ss << ". " << dst << "\n";
-                ss << "= " << dst << ", " << to_string($1) << "\n";
-                //temp.append(". ");
-                //temp.append(dst);
-                //temp.append("\n");
-                //temp = temp + "= " + dst + ", " + to_string($1) + "\n";
+                string temp0 = make_temp();
+                ss << ". " << temp0 << "\n";
+                ss << "= " << temp0 << ", " << to_string($1) << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
-                $$.ret_name = strdup(dst.c_str());
+                $$.ret_name = strdup(temp0.c_str());
             }
             | L_PAREN expression R_PAREN {
                 $$.code = strdup($2.code);
@@ -857,49 +626,31 @@ term:       SUB var {
             }
             | ident L_PAREN expressions R_PAREN {
                 stringstream ss;
-                //string temp;
                 string func = $1.ret_name;
                 if (predefFuncs.find(func) == predefFuncs.end()) {
                     cout << "Calling undeclared function " << func.c_str() << endl;
-                    //printf("Calling undeclared function %s.\n", func.c_str());
                 }
-                string dst = make_temp();
+                string temp0 = make_temp();
                 ss << $3.code;
-                ss << ". " << dst << "\ncall ";
+                ss << ". " << temp0 << "\ncall ";
                 ss << $1.ret_name;
-                ss << ", " << dst << "\n";
-
-                //temp.append($3.code);
-                //temp += ". " + dst + "\ncall ";
-                //temp.append($1.ret_name);
-                //temp += ", " + dst + "\n";
+                ss << ", " << temp0 << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
-                $$.ret_name = strdup(dst.c_str());
+                $$.ret_name = strdup(temp0.c_str());
             };
 
 expressions:    expression {
                     stringstream ss;
-                    //string temp;
                     ss << $1.code << "param " << $1.ret_name << "\n";
-                    //temp.append($1.code);
-                    //temp.append("param ");
-                    //temp.append($1.ret_name);
-                    //temp.append("\n");
                     string temp = ss.str();
                     $$.code = strdup(temp.c_str());
                     $$.ret_name = strdup("");
                 }
                 | expression COMMA expressions {
                     stringstream ss;
-                    //string temp;
                     ss << $1.code << "param " << $1.ret_name << "\n";
                     ss << $3.code;
-                    //temp.append($1.code);
-                    //temp.append("param ");
-                    //temp.append($1.ret_name);
-                    //temp.append("\n");
-                    //temp.append($3.code);
                     string temp = ss.str();
                     $$.code = strdup(temp.c_str());
                     $$.ret_name = strdup("");
@@ -907,39 +658,26 @@ expressions:    expression {
 
 vars:	    var COMMA vars {
                 stringstream ss;
-                //string temp;
                 ss << $1.code;
-                //temp.append($1.code);
                 if ($1.is_arr) {
                     ss << ".[]| ";
-                    //temp.append(".[]| ");
                 } else {
                     ss << ".| ";
-                    //temp.append(".| ");
                 }
                 ss << $1.ret_name << "\n" << $3.code;
-                //temp.append($1.ret_name);
-                //temp.append("\n");
-                //temp.append($3.code);
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
                 $$.ret_name = strdup("");
             }
             | var {
                 stringstream ss;
-                //string temp;
                 ss << $1.code;
-                //temp.append($1.code);
                 if ($1.is_arr) {
                     ss << ".[]| ";
-                    //temp.append(".[]| ");
                 } else {
                     ss << ".| ";
-                    //temp.append(".| ");
                 }
                 ss << $1.ret_name << "\n";
-                //temp.append($1.ret_name);
-                //temp.append("\n");
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
                 $$.ret_name = strdup("");
@@ -950,29 +688,21 @@ var:        ident {
                 string ident = $1.ret_name;
                 if (predefFuncs.find(ident) == predefFuncs.end() && tempVars.find(ident) == tempVars.end()) {
                     cout << "Identifier " << ident.c_str() << " is not declared" << endl;
-                    //printf("Identifier %s is not declared.\n", ident.c_str());
                 } else if (arrSize[ident] > 1) {
                     cout << "No index provided for array identifier " << ident.c_str() << endl;
-                    //printf("Did not provide index for array Identifier %s.\n", ident.c_str());
                 }
                 $$.ret_name = strdup(ident.c_str());
                 $$.is_arr = false;
             }
             | ident L_SQUARE_BRACKET expression R_SQUARE_BRACKET {
                 stringstream ss;
-                //string temp;
                 string ident = $1.ret_name;
                 if (predefFuncs.find(ident) == predefFuncs.end() && tempVars.find(ident) == tempVars.end()) {
                     cout << "Identifier " << ident.c_str() << " not declared." << endl;
-                    //printf("Identifier %s is not declared.\n", ident.c_str());
                 } else if (arrSize[ident] == 1) {
                     cout << "Provided index for non-array identifier " << ident.c_str() << endl;
-                    //printf("Provided index for non-array Identifier %s.\n", ident.c_str());
                 }
                 ss << $1.ret_name << ", " << $3.ret_name;
-                //temp.append($1.ret_name);
-                //temp.append(", ");
-                //temp.append($3.ret_name);
                 string temp = ss.str();
                 $$.code = strdup($3.code);
                 $$.ret_name = strdup(temp.c_str());
