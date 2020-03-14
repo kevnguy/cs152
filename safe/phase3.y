@@ -660,7 +660,7 @@ vars:	    var COMMA vars {
                 stringstream ss;
                 ss << $1.code;
                 if ($1.is_arr) {
-                    ss << ".[]| ";
+                    ss << ".[]/ ";
                 } else {
                     ss << "./ ";
                 }
@@ -673,7 +673,7 @@ vars:	    var COMMA vars {
                 stringstream ss;
                 ss << $1.code;
                 if ($1.is_arr) {
-                    ss << ".[]| ";
+                    ss << ".[]/ ";
                 } else {
                     ss << "./ ";
                 }
