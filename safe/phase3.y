@@ -547,7 +547,7 @@ multiplicative-expr: term MULT multiplicative-expr {
                 stringstream ss;
                 string temp0 = make_temp();
                 ss << $1.code << $3.code << ". " << temp0 << "\n";
-                ss << "% t" << temp0 << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
+                ss << "% " << temp0 << ", " << $1.ret_name << ", " << $3.ret_name << "\n";
                 string temp = ss.str();
                 $$.code = strdup(temp.c_str());
                 $$.ret_name = strdup(temp0.c_str());
