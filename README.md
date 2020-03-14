@@ -31,3 +31,11 @@ To invoke lexical analyzer executable `lexer`, use
 * `bison -v -d mini_l.y` compiles a `bison.c` file
 * `gcc -std=c++11 -o parser mini_l.tab.c lex.yy.c -lfl` creates an executable `parser`
 * If input is read from file, execute with `cat | name_if_input_file.txt | parser`
+
+## Part 3
+### Instructions for use (bolt)
+* `make` compiles the `.lex` and `.y` files
+* run `make test` to generate `.mil` files
+* To run a generated `.mil` file with `mil_run`
+  * `mil_run [filename].mil` for files that do not require input
+  * otherwise, use `mil_run [filename].mil < [inputfile].txt`
