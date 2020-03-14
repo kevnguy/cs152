@@ -213,7 +213,8 @@ declaration:        identifiers COLON INTEGER { //done
                                         // printf("Declaring array ident %s of size <= 0.\n", ident.c_str());
                                     }
                                     tempVars[id] = id;
-                                    arraySizes[id] = $5.ret_name;
+                                    string temp_ret = $5.ret_name;
+                                    arraySizes[id] = temp_ret;
                                 }
                                 ss << id;
                                 // temp.append(ident);
@@ -233,7 +234,8 @@ declaration:        identifiers COLON INTEGER { //done
                                         // printf("Declaring array ident %s of size <= 0.\n", ident.c_str());
                                     }
                                     tempVars[id] = id;
-                                    arraySizes[id] = $5.ret_name;
+                                    string temp_ret = $5.ret_name;
+                                    arraySizes[id] = temp_ret;
                                 }
                                 ss << id;
                                 // temp.append(ident);
@@ -520,7 +522,8 @@ identifiers:        identifier COMMA identifiers { //done
                     };
 identifier:         IDENT { //done
                         $$.code = "";
-                        $$.ret_name = strdup($1);
+                        string temp = $1;
+                        $$.ret_name = strdup(temp.c_str());
                     };
 number:             NUMBER {
                         $$.ret_name = to_string($1);
