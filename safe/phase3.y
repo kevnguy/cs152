@@ -97,7 +97,7 @@ function:   FUNCTION func_ident SEMICOLON BEGIN_PARAMS declarations END_PARAMS B
                     cout << "ERROR: Continue is outside loop in function " << $2.ret_name << endl;
                     //printf("ERROR: Continue is outside loop in function %s\n", $2.ret_name);
                 }
-                ss << statements << "endfunc\n";
+                ss << statements << "endfunc\n\n";
                 string temp = ss.str();
                 cout << temp;
             };
