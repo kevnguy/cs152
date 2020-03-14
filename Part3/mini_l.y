@@ -323,19 +323,31 @@ statement:          var ASSIGN expression {
                         ss << ": " << label1 << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        // stringstream ss;
-                        // ss << $2.code;
-                        // ss << "?:= " << label0 << ", " << $2.ret_name << "\n";
-                        // ss << ":= " << label1;
-                        // ss << ": " << label0;
-                        // ss << $4.code;
-                        // ss << ":= " << label2;
-                        // ss << ": " << label1;
-                        // ss << $6.code;
-                        // ss << ": " << label2;
-                        // $$.code = ss.str();
                     }
-                    | WHILE bool_exp BEGINLOOP statements ENDLOOP {}
+                    | WHILE bool_exp BEGINLOOP statements ENDLOOP {
+                        stringstream ss;
+                        string start = make_label();
+                        string in = make_label();
+                        string after = make_label();
+                        string statementCode = $4.code;
+                        size_t contPos = statementCode.find("continue");
+                        while (contPos != string::npos) {
+                            statementCode.replace(contPos, 8, ":= " + start);
+                            contPos = statementCode.find("continue");
+                        }
+                        ss << ": ";
+                        ss << start << "\n";
+                        ss << $2.code;
+                        ss << "?:= " << in << ", ";
+                        ss << $2.ret_name << "\n";
+                        ss << ":= " << after << "\n";
+                        ss << ": " << in << "\n";
+                        ss << statementCode;
+                        ss << ":= " << start << "\n";
+                        ss << ": " << after << "\n";
+                        string temp = ss.str();
+                        $$.code = strdup(temp.c_str());
+                    }
                     | DO BEGINLOOP statements ENDLOOP WHILE bool_exp {}
                     | FOR var ASSIGN number SEMICOLON bool_exp SEMICOLON var ASSIGN expression BEGINLOOP statements ENDLOOP {}
                     | READ vars {}
