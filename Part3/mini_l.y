@@ -24,6 +24,8 @@
     int yyerror(string s);
     int yyerror(char *s);
     int yylex(void);
+    string make_temp();
+    string make_label();
     extern FILE* yyin;
     bool existsMain = false;
     map<string, int> arraySizes;
@@ -206,12 +208,12 @@ declaration:        identifiers COLON INTEGER { //done
                                     cout << "Id " << id << " has previously been declared" << endl;
                                     // printf("Identifier %s is previously declared.\n", ident.c_str());
                                 } else {
-                                    if ($5 <= 0) {
+                                    if ($5.ret_name <= 0) {
                                         cout << "Error: declaring array id " << id << " of size <= 0" << endl;
                                         // printf("Declaring array ident %s of size <= 0.\n", ident.c_str());
                                     }
                                     tempVars[id] = id;
-                                    arraySizes[id] = $5;
+                                    arraySizes[id] = $5.ret_name;
                                 }
                                 ss << id;
                                 // temp.append(ident);
@@ -226,19 +228,19 @@ declaration:        identifiers COLON INTEGER { //done
                                     cout << "Id " << id << "has been previously declared" << endl;
                                     // printf("Identifier %s is previously declared.\n", ident.c_str());
                                 } else {
-                                    if ($5 <= 0) {
+                                    if ($5.ret_name <= 0) {
                                         cout << "Error: declaring array id " << id << " of size <= 0" << endl;
                                         // printf("Declaring array ident %s of size <= 0.\n", ident.c_str());
                                     }
                                     tempVars[id] = id;
-                                    arraySizes[id] = $5;
+                                    arraySizes[id] = $5.ret_name;
                                 }
                                 ss << id;
                                 // temp.append(ident);
                                 leftP = rightP + 1;
                             }
                             ss << ", ";
-                            ss << to_string($5);
+                            ss << $5.ret_name;
                             ss << "\n";
                             // temp.append(", ");
                             // temp.append(std::to_string($5));
@@ -275,10 +277,10 @@ statement:          var ASSIGN expression {
                         if($1.isArray && $3.isArray) {
                             ss << "[]= ";
                         }
-                        else if($1.arr) {
+                        else if($1.isArray) {
                             ss << "[]= ";
                         }
-                        else if($3.arr) {
+                        else if($3.isArray) {
                             ss << "= ";
                         }
                         else {
@@ -307,7 +309,6 @@ statement:          var ASSIGN expression {
                         ss << ": " << label1 << "\n";
                         string temp = ss.str();
                         $$.code = strdup(temp.c_str());
-                        $$.ret_name = "";
                     }
                     | IF bool_exp THEN statements ELSE statements ENDIF {
                         // string label0 = make_label();
@@ -340,7 +341,6 @@ statements:         statement SEMICOLON statements {
                     }
                     | /*epsilon*/ {
                         $$.code = "";
-                        $$.ret_name = "";
                     };
 bool_exp:           relation_and_exp OR relation_and_exp {}
                     | relation_and_exp {
@@ -523,8 +523,8 @@ identifier:         IDENT { //done
                         $$.ret_name = strdup($1);
                     };
 number:             NUMBER {
-                        // $$.ret_name = to_string($1);
-                        // $$.code = "";
+                        $$.ret_name = to_string($1);
+                        $$.code = "";
                     };
 expressions:        expression COMMA expressions {
                         // stringstream ss;
