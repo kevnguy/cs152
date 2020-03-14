@@ -1,0 +1,44 @@
+Identifier ENDIF is a reserved word.
+Identifier n was previously declared
+Identifier m was previously declared
+Declaring and array ident arr of size less than or equal to 0.
+Identifier l is not declared
+Calling undeclared function fibonacci
+Provided index for non-array identifier n
+No index provided for array identifier fib_n
+func man
+. n
+. ENDIF
+. Ident
+= n, $0
+= ENDIF, $1
+= Ident, $2
+. n
+.[] m, 5
+. m
+.[] fib_n, 10
+.[] arr, 0
+. __temp__0
+= __temp__0, 10
+= n, __temp__0
+. __temp__1
+= __temp__1, 5
+= l, __temp__1
+. __temp__2
+= __temp__2, 1
+. __temp__3
+= __temp__3, n
+param __temp__3
+. __temp__4
+call fibonacci, __temp__4
+[]= fib_n, __temp__2, __temp__4
+. __temp__5
+= __temp__5, 2
+. __temp__6
+= __temp__6, 4
+[]= n, __temp__5, __temp__6
+. __temp__7
+= __temp__7, 7
+= fib_n, __temp__7
+endfunc
+Missing main function declaration

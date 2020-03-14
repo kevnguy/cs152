@@ -1,0 +1,25 @@
+func main
+. n
+= n, 0
+: __label__0
+. __temp__0
+= __temp__0, n
+. __temp__1
+= __temp__1, 10
+. __temp__2
+< __temp__2, __temp__0, __temp__1
+?:= __label__1, __temp__2
+:= __label__3
+: __label__1
+.> n
+: __label__2
+. __temp__3
+= __temp__3, n
+. __temp__4
+= __temp__4, 1
+. __temp__5
++ __temp__5, __temp__3, __temp__4
+[]= n, __temp__5
+:= __label__0
+: __label__3
+endfunc
