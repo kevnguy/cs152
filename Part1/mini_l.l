@@ -105,6 +105,7 @@ COMMENT [#]
 
 {LETTER} {
     printf("IDENT %s\n", yytext);
+    currPos += yyleng;
 }
 
 {LETTER}({LETTER}|{DIGIT}|{UNDERSCORE})*({LETTER}|{DIGIT}) {
