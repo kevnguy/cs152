@@ -62,11 +62,14 @@ bool_exp:           relation_and_exp OR relation_and_exp {cout << "bool_exp -> r
 relation_and_exp:   relation_exp AND relation_exp {cout << "relation_and_exp -> relation_exp AND relation_exp" << endl;}
                     | relation_exp {cout << "relation_and_exp -> relation_exp" << endl;};
 relation_exp:       nots expression comp expression {cout << "relation_exp -> nots expression comp expression" << endl;}
+                    | nots TRUE {cout << "relation_exp -> nots TRUE" << endl;}
+                    | nots FALSE {cout << "relation_exp -> nots FALSE" << endl;}
+                    | nots L_PAREN bool_exp R_PAREN {cout << "relation_exp -> nots L_PAREN bool_exp R_PAREN" << endl;}
+                    | expression comp expression {cout << "relation_exp -> nots expression comp expression" << endl;}
                     | TRUE {cout << "relation_exp -> TRUE" << endl;}
                     | FALSE {cout << "relation_exp -> FALSE" << endl;}
                     | L_PAREN bool_exp R_PAREN {cout << "relation_exp -> L_PAREN bool_exp R_PAREN" << endl;};
 nots:               NOT {cout << "nots -> NOT" << endl;};
-                    | /*epsilon*/ {cout << "nots -> epsilon" << endl;};
 comp:               EQ {cout << "comp -> EQ" << endl;}
                     | NEQ {cout << "comp -> NEQ" << endl;}
                     | LT {cout << "comp -> LT" << endl;}
@@ -82,7 +85,8 @@ multiplicative_expression: term {cout << "multiplicative_expression -> term" << 
                     | term MOD term {cout << "multiplicative_expression -> term MOD term" << endl;};
 term:               NEG term_num {cout << "term -> NEG term_num" << endl;}
                     | term_num {cout << "term -> term_num" << endl;}
-                    | identifier L_PAREN expressions R_PAREN {cout << "term -> identifier L_PAREN expressions R_PAREN" << endl;};
+                    | identifier L_PAREN expressions R_PAREN {cout << "term -> identifier L_PAREN expressions R_PAREN" << endl;}
+                    | identifier L_PAREN R_PAREN {cout << "term -> identifier L_PAREN R_PAREN" << endl;};
 term_num:           var {cout << "term_num -> var" << endl;}
                     | number {cout << "term_num -> number" << endl;}
                     | L_PAREN expression R_PAREN {cout << "term_num -> L_PAREN expression R_PAREN" << endl;};
@@ -95,8 +99,7 @@ identifiers:        identifier COMMA identifiers {cout << "identifiers -> identi
 identifier:         IDENT {cout << "identifier -> IDENT " << $1 << endl;};
 number:             NUMBER {cout << "number -> NUMBER " << $1 << endl;};
 expressions:        expression COMMA expressions {cout << "expressions -> expression COMMA expressions" << endl;}
-                    | expression {cout << "expressions -> expression" << endl;}
-                    | {cout << "expressions -> epsilon" << endl;};
+                    | expression {cout << "expressions -> expression" << endl;};
 
 %%
 
