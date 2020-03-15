@@ -108,13 +108,7 @@ COMMENT [#]
 }
 
 {LETTER}({LETTER}|{DIGIT}|{UNDERSCORE})*({LETTER}|{DIGIT}) {
-   if(reservedWords.find(yytext) == reservedWords.end()) {
-      printf("IDENT %s\n", yytext);
-   }
-   else {
-      temp = reservedWords[yytext];
-      printf("%s\n", temp.c_str());
-   }
+   printf("IDENT %s\n", yytext);
    currPos += yyleng;
 }
 
