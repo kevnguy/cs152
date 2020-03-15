@@ -77,8 +77,8 @@ comp:               EQ {cout << "comp -> EQ" << endl;}
                     | LTE {cout << "comp -> LTE" << endl;}
                     | GTE {cout << "comp -> GTE" << endl;};
 expression:         multiplicative_expression {cout << "expression -> multiplicative_expression" << endl;}
-                    | multiplicative_expression ADD multiplicative_expression {cout << "expression -> multiplicative_expression ADD multiplicative_expression" << endl;}
-                    | multiplicative_expression SUB multiplicative_expression {cout << "expression -> multiplicative_expression SUB multiplicative_expression" << endl;};
+                    | multiplicative_expression ADD expression {cout << "expression -> multiplicative_expression ADD multiplicative_expression" << endl;}
+                    | multiplicative_expression SUB expression {cout << "expression -> multiplicative_expression SUB multiplicative_expression" << endl;};
 multiplicative_expression: term {cout << "multiplicative_expression -> term" << endl;}
                     | term MULT term {cout << "multiplicative_expression -> term MULT term" << endl;}
                     | term DIV term {cout << "multiplicative_expression -> term DIV term" << endl;}
