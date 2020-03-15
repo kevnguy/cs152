@@ -44,6 +44,8 @@ UNDERSCORE [_]
 COMMENT [#]
 
 %%
+{COMMENT}{COMMENT}({LETTER}|{DIGIT}|{UNDERSCORE}|{COMMENT}|[\t]|[ ])* {currPos = 1; currLine++;}
+
 "function"     {currPos += yyleng; return FUNCTION;}
 "beginparams"  {currPos += yyleng; return BEGIN_PARAMS;}
 "endparams"    {currPos += yyleng; return END_PARAMS;}
@@ -111,8 +113,6 @@ COMMENT [#]
 }
 
 [ \t]+         {/* ignore spaces */ currPos += yyleng;}
-
-{COMMENT}{COMMENT}({LETTER}|{DIGIT}|{UNDERSCORE}|{COMMENT}|[\t]|[ ])* {currPos = 1; currLine++;}
 
 "\n"           {currLine++; currPos = 1;}
 "\r"           {currLine++; currPos = 1;}
