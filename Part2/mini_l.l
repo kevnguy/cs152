@@ -115,7 +115,7 @@ COMMENT [#]
 {COMMENT}{COMMENT}({LETTER}|{DIGIT}|{UNDERSCORE}|{COMMENT}|[\t]|[ ])* {currPos = 1; currLine++;}
 
 "\n"           {currLine++; currPos = 1;}
-"\r"
+"\r"           {currLine++; currPos = 1;}
 
 {UNDERSCORE}({LETTER}|{DIGIT})* {
    {printf("Error at line %d, column %d: identifier \"%s\" must begin with a letter\n", currLine, currPos, yytext); exit(0);}
