@@ -8,8 +8,14 @@ parser: mini_l.l mini_l.y
 	$(CC) $(CFLAGS) -o parser mini_l.tab.c lex.yy.c -lfl
 	rm -f lex.yy.c
 
-test: parser
+test1: parser
 		cat fibonacci.min | ./parser
+
+test2: parser
+		cat ./tests/mytest.min | ./parser
+
+test3: parser
+		cat ./tests/primes.min | ./parser
 
 clean:
 	rm -f *.o parser mini_l.tab.* mini_l.output *~ lex.yy.c tok.h a.out
